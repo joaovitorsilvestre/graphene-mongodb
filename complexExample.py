@@ -5,11 +5,19 @@ import json
 
 connect('MongraphQL')  # make sure to your mongodb is running, if isn't, run 'mongod' in terminal
 
+class Country(Document):
+    name = StringField()
+    area_code = IntField()
+
+brazil = Country(name="Brazil",
+                 area_code=55)
+
 class Bank(Document):
     name = StringField()
+    country = ReferenceField(Country)
 
-bank = Bank(name="Caixa")
-bank.save()
+bank = Bank(name="Caixa",
+            country=brazil)
 
 class User(Document):
     username = StringField()
@@ -26,18 +34,26 @@ user = User(username="John",
             age=18,
             score=5.5,
             bank=bank)
+
+brazil.save()
+bank.save()
 user.save()
+
+class CountrySchema(metaclass=MongraphSchema):
+    __MODEL__ = Country
 
 class BankSchema(metaclass=MongraphSchema):
     __MODEL__ = Bank
+    __REF__ = {'country': CountrySchema}
 
 class UserSchema(metaclass=MongraphSchema):
     __MODEL__ = User
     __REF__ = {'bank': BankSchema}
 
 class Query(graphene.ObjectType):
-    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolve_self)
+    country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.resolve_self)
     bank = graphene.Field(BankSchema, **BankSchema.fields, resolver=BankSchema.resolve_self)
+    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolve_self)
 
 schema = graphene.Schema(query=Query)
 
@@ -50,6 +66,10 @@ result = schema.execute("""query Data {
         score
         bank {
             name
+            country {
+                name
+                areaCode
+            }
         }
     }
 }""")

@@ -1,3 +1,5 @@
+import re
+
 from graphql.utils.ast_to_dict import ast_to_dict
 from mongoengine import *
 import graphene
@@ -9,10 +11,17 @@ class Utils:
         return six_with_metaclass(*args, **kwargs)
 
     @staticmethod
+    def convert_camel_case(string):
+        res = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', string)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', res).lower()
+
+    @staticmethod
     def generic_resolver(grapheneObject, args, info):
         mongoObject = grapheneObject.__MODEL__
 
         fields = [k for k, v in Utils.get_fields(info).items() if k[:2] != '__']
+        fields = [Utils.convert_camel_case(f) for f in fields]
+
         result = mongoObject.objects(**args).only(*fields).first()
 
         if result:
