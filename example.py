@@ -22,10 +22,6 @@ user.save()
 class UserSchema(metaclass=MongraphSchema):
     __MODEL__ = User
 
-## OR (for more compability with Python 2.x)
-# class UserSchema(Utils.with_metaclass(MongraphSchema, graphene.ObjectType)):
-#     __MODEL__ = User
-
 class Query(graphene.ObjectType):
     user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolve_self)
 
@@ -43,16 +39,4 @@ result = schema.execute("""query Data {
 
 parsed = {k: dict(v) for k, v in dict(result.data).items()}
 print(json.dumps(parsed, indent=4, sort_keys=True))
-"""
-{
-    "user": {
-        "active": true,
-        "age": 18,
-        "password": "123456789",
-        "score": 5.5,
-        "username": "John"
-    }
-}
-"""
-
 user.delete()
