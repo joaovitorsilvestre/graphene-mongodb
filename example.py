@@ -8,8 +8,15 @@ connect('MongraphQL')  # make sure to your mongodb is running, if isn't, run 'mo
 class User(Document):
     username = StringField()
     password = StringField()
+    active = BooleanField()
+    age = IntField()
+    score = FloatField()
 
-user = User(username="John", password="123456789")
+user = User(username="John",
+            password="123456789",
+            active=True,
+            age=18,
+            score=5.5)
 user.save()
 
 class UserSchema(metaclass=MongraphSchema):
@@ -28,8 +35,24 @@ result = schema.execute("""query Data {
     user(username: "John") {
         username
         password
+        active
+        age
+        score
     }
 }""")
 
 parsed = {k: dict(v) for k, v in dict(result.data).items()}
 print(json.dumps(parsed, indent=4, sort_keys=True))
+"""
+{
+    "user": {
+        "active": true,
+        "age": 18,
+        "password": "123456789",
+        "score": 5.5,
+        "username": "John"
+    }
+}
+"""
+
+user.delete()

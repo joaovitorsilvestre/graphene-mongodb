@@ -76,7 +76,9 @@ class MongraphSchema(type):
 
         dict_convert = {
             StringField: graphene.String(),
-            BooleanField: graphene.Boolean()
+            BooleanField: graphene.Boolean(),
+            IntField: graphene.Int(),
+            FloatField: graphene.Float(),
         }
 
         ## attr to store the type for use it in graphene.Field(... username=graphene.String etc
