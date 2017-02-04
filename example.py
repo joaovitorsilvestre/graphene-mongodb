@@ -1,7 +1,9 @@
-from mongoengine import *
-from MongographQL import MongraphSchema, Utils
-import graphene
 import json
+
+from mongoengine import *
+from MongographQL import MongraphSchema
+import graphene
+
 
 connect('MongraphQL')  # make sure to your mongodb is running, if isn't, run 'mongod' in terminal
 

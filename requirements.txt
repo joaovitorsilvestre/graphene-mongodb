@@ -2,6 +2,7 @@ appdirs==1.4.0
 graphene==1.1.3
 graphql-core==1.0.1
 graphql-relay==0.4.5
+iso8601==0.1.11
 mongoengine==0.11.0
 packaging==16.8
 promise==1.0.1

@@ -3,6 +3,7 @@ import re
 from graphql.utils.ast_to_dict import ast_to_dict
 from mongoengine import *
 import graphene
+from graphene.types.datetime import DateTime
 
 class Utils:
     @staticmethod
@@ -117,6 +118,7 @@ class MongraphSchema(type):
             BooleanField: graphene.Boolean(),
             IntField: graphene.Int(),
             FloatField: graphene.Float(),
+            DateTimeField: DateTime()
         }
 
     @classmethod

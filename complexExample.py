@@ -1,7 +1,10 @@
+from datetime import datetime
+import json
+
 from mongoengine import *
 from MongographQL import MongraphSchema, Utils
 import graphene
-import json
+
 
 connect('MongraphQL')  # make sure to your mongodb is running, if isn't, run 'mongod' in terminal
 
@@ -36,6 +39,7 @@ class User(Document):
     bank = ReferenceField(Bank)
     posts = ListField(ReferenceField(Posts))
     favorite_colors = ListField(StringField())
+    creation_date = DateTimeField()
 
 user = User(username="John",
             password="123456789",
@@ -44,7 +48,8 @@ user = User(username="John",
             score=5.5,
             bank=bank,
             posts=[post1, post2],
-            favorite_colors=['blue', 'red']
+            favorite_colors=['blue', 'red'],
+            creation_date=datetime.now()
             )
 
 brazil.save()
@@ -91,6 +96,7 @@ result = schema.execute("""query Data {
             text
         }
         favoriteColors
+        creationDate
     }
 }""")
 
