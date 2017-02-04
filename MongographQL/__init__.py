@@ -16,6 +16,21 @@ class Utils:
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', res).lower()
 
     @staticmethod
+    def generic_resolver_list(grapheneObject, args, info):
+        mongoObject = grapheneObject.__MODEL__
+
+        fields = [k for k, v in Utils.get_fields(info).items() if k[:2] != '__']
+        users = mongoObject.objects(**args).only(*fields)
+
+        if users:
+            def get_user_attrs(u):
+                return {f: getattr(u, f) for f in fields}
+
+            return [grapheneObject(**get_user_attrs(u)) for u in users]
+        else:
+            return []
+
+    @staticmethod
     def generic_resolver(grapheneObject, args, info):
         mongoObject = grapheneObject.__MODEL__
 
@@ -70,7 +85,7 @@ class MongraphSchema(type):
         MODEL = attrs.get('__MODEL__')
         REF = attrs.get('__REF__') or {}
 
-        model_attrs = {k: type(v) for k, v in MODEL._fields.items() if k != 'id'}   # key: fields name, value: type of mongoField
+        model_attrs = {k: v for k, v in MODEL._fields.items() if k != 'id'}   # key: fields name, value: type of mongoField
         references = {k: v for k, v in REF.items()}                                 # key: name of field, value: Schema
 
         ## this is used to easy way to pass this Schema fields as second paramter to graphene.Field
@@ -83,12 +98,17 @@ class MongraphSchema(type):
         subclass = type(class_name, (graphene.ObjectType,), attrs)
 
         setattr(subclass, 'resolve_self', classmethod(cls.resolver_self))
+        setattr(subclass, 'resolver_self_list', classmethod(cls.resolver_self_list))
 
         return subclass
 
     def resolver_self(self, root, args, contex, info):
         """ this function will be passed to generated subclass """
         return Utils.generic_resolver(self, args, info)
+
+    def resolver_self_list(self, root, args, context, info):
+        """ this function will be passed to generated subclass """
+        return Utils.generic_resolver_list(self, args, info)
 
     @staticmethod
     def respective_fields():
@@ -100,25 +120,32 @@ class MongraphSchema(type):
         }
 
     @classmethod
-    def respective_special_field(cls, f_name, mongo_field, references):
-        if mongo_field == ReferenceField:
-            Schema = references.get(f_name)
-            return graphene.Field(Schema, **Schema.fields, resolver=Schema.resolve_self)
-
-    @classmethod
     def is_special_field(cls, mongo_field):
-        return mongo_field == ReferenceField
+        special_fields = [ReferenceField, ListField]
+        return mongo_field in special_fields
 
     @classmethod
     def convert_fields(cls, attrs, model_attrs, references):
         for f_name, mongo_field in model_attrs.items():
-            if not cls.is_special_field(mongo_field):
-                respective_field = cls.respective_fields()[mongo_field]
+            if not cls.is_special_field(type(mongo_field)):
+                respective_field = cls.respective_fields()[type(mongo_field)]
 
                 attrs[f_name] = respective_field
                 attrs['fields'][f_name] = respective_field
-            else:
-                attrs[f_name] = cls.respective_special_field(f_name, mongo_field, references)
+            elif type(mongo_field) == ReferenceField:
+                Schema = references.get(f_name)
+                attrs[f_name] = graphene.Field(Schema, **Schema.fields, resolver=Schema.resolve_self)
+            elif type(mongo_field) == ListField:
+                # need to resolve type that this list has
+                list_type = type(mongo_field.field)
+
+                if not cls.is_special_field(list_type):
+                    # this is necessary because of graphene.List must receive a class not a instance
+                    respective_field = type(cls.respective_fields()[list_type])
+                    attrs[f_name] = graphene.List(respective_field)
+                else:
+                    Schema = references.get(f_name)
+                    attrs[f_name] = graphene.List(Schema, **Schema.fields, resolver=Schema.resolver_self_list)
 
         return attrs
 
