@@ -5,6 +5,14 @@ import json
 
 connect('MongraphQL')  # make sure to your mongodb is running, if isn't, run 'mongod' in terminal
 
+class Posts(Document):
+    title = StringField()
+    text = StringField()
+post1 = Posts(title="Post1", text="LOL")
+post2 = Posts(title="Post2", text="HEY JOE")
+post1.save()
+post2.save()
+
 class Country(Document):
     name = StringField()
     area_code = IntField()
@@ -26,18 +34,25 @@ class User(Document):
     age = IntField()
     score = FloatField()
     bank = ReferenceField(Bank)
-
+    posts = ListField(ReferenceField(Posts))
+    favorite_colors = ListField(StringField())
 
 user = User(username="John",
             password="123456789",
             active=True,
             age=18,
             score=5.5,
-            bank=bank)
+            bank=bank,
+            posts=[post1, post2],
+            favorite_colors=['blue', 'red']
+            )
 
 brazil.save()
 bank.save()
 user.save()
+
+class PostsSchema(metaclass=MongraphSchema):
+    __MODEL__ = Posts
 
 class CountrySchema(metaclass=MongraphSchema):
     __MODEL__ = Country
@@ -48,7 +63,7 @@ class BankSchema(metaclass=MongraphSchema):
 
 class UserSchema(metaclass=MongraphSchema):
     __MODEL__ = User
-    __REF__ = {'bank': BankSchema}
+    __REF__ = {'bank': BankSchema, 'posts': PostsSchema}
 
 class Query(graphene.ObjectType):
     country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.resolve_self)
@@ -71,6 +86,11 @@ result = schema.execute("""query Data {
                 areaCode
             }
         }
+        posts {
+            title
+            text
+        }
+        favoriteColors
     }
 }""")
 
@@ -79,3 +99,5 @@ print(json.dumps(parsed, indent=4, sort_keys=True))
 
 user.delete()
 bank.delete()
+post1.delete()
+post2.delete()
