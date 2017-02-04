@@ -24,19 +24,6 @@ class Utils:
     # author: mixxorz
     @staticmethod
     def collect_fields(node, fragments):
-        """Recursively collects fields from the AST
-        Args:
-            node (dict): A node in the AST
-            fragments (dict): Fragment definitions
-        Returns:
-            A dict mapping each field found, along with their sub fields.
-            {'name': {},
-             'sentimentsPerLanguage': {'id': {},
-                                       'name': {},
-                                       'totalSentiments': {}},
-             'slug': {}}
-        """
-
         field = {}
 
         if node.get('selection_set'):
@@ -71,31 +58,58 @@ class Utils:
 
 class MongraphSchema(type):
     def __new__(cls, class_name, parents, attrs):
-        model = attrs.get('__MODEL__')
-        model_attrs = {k: v for k, v in model._fields.items() if k != 'id'}
+        MODEL = attrs.get('__MODEL__')
+        REF = attrs.get('__REF__') or {}
 
-        dict_convert = {
+        model_attrs = {k: type(v) for k, v in MODEL._fields.items() if k != 'id'}   # key: fields name, value: type of mongoField
+        references = {k: v for k, v in REF.items()}                                 # key: name of field, value: Schema
+
+        ## this is used to easy way to pass this Schema fields as second paramter to graphene.Field
+        # For instance, graphene.Field(UserSchema, **UserSchema.fields, resolver ...
+        attrs['fields'] = {}
+
+        attrs = cls.convert_fields(attrs, model_attrs, references) # all fields converted to respective graphene
+
+        # generate the graphene class
+        subclass = type(class_name, (graphene.ObjectType,), attrs)
+
+        setattr(subclass, 'resolve_self', classmethod(cls.resolver_self))
+
+        return subclass
+
+    def resolver_self(self, root, args, contex, info):
+        """ this function will be passed to generated subclass """
+        return Utils.generic_resolver(self, args, info)
+
+    @staticmethod
+    def respective_fields():
+        return {
             StringField: graphene.String(),
             BooleanField: graphene.Boolean(),
             IntField: graphene.Int(),
             FloatField: graphene.Float(),
         }
 
-        ## attr to store the type for use it in graphene.Field(... username=graphene.String etc
-        attrs['fields'] = {}
+    @classmethod
+    def respective_special_field(cls, f_name, mongo_field, references):
+        if mongo_field == ReferenceField:
+            Schema = references.get(f_name)
+            return graphene.Field(Schema, **Schema.fields, resolver=Schema.resolve_self)
 
-        for k, v in model_attrs.items():
-            respective_graphene = dict_convert.get(type(v))
+    @classmethod
+    def is_special_field(cls, mongo_field):
+        return mongo_field == ReferenceField
 
-            attrs[k] = respective_graphene
-            attrs['fields'][k] = respective_graphene
+    @classmethod
+    def convert_fields(cls, attrs, model_attrs, references):
+        for f_name, mongo_field in model_attrs.items():
+            if not cls.is_special_field(mongo_field):
+                respective_field = cls.respective_fields()[mongo_field]
 
-        subclass = type(class_name, (graphene.ObjectType,), attrs)
+                attrs[f_name] = respective_field
+                attrs['fields'][f_name] = respective_field
+            else:
+                attrs[f_name] = cls.respective_special_field(f_name, mongo_field, references)
 
-        #add the resolver
-        setattr(subclass, 'resolve_self', classmethod(cls.resolver_self))
+        return attrs
 
-        return subclass
-
-    def resolver_self(self, root, args, contex, info):
-        return Utils.generic_resolver(self, args, info)
