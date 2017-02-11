@@ -122,29 +122,24 @@ class MongraphSchema(type):
         """ this function will be passed to generated subclass """
         return Utils.generic_resolver_list(self, args, info)
 
-    @staticmethod
-    def respective_fields():
-        return {
-            StringField: graphene.String(),
-            BooleanField: graphene.Boolean(),
-            IntField: graphene.Int(),
-            FloatField: graphene.Float(),
-            DateTimeField: DateTime(),
-            ObjectIdField: graphene.ID(),
-            URLField: graphene.String(),
-            DictField: CustomDictField()
-        }
+    RESPECTIVE_FIELDS = {
+        StringField: graphene.String(),
+        BooleanField: graphene.Boolean(),
+        IntField: graphene.Int(),
+        FloatField: graphene.Float(),
+        DateTimeField: DateTime(),
+        ObjectIdField: graphene.ID(),
+        URLField: graphene.String(),
+        DictField: CustomDictField()
+    }
 
-    @classmethod
-    def is_special_field(cls, mongo_field):
-        special_fields = [ReferenceField, ListField, PointField]
-        return mongo_field in special_fields
+    SPECIAL_FIELDS = [ReferenceField, ListField, PointField]
 
     @classmethod
     def convert_fields(cls, attrs, model_attrs, references):
         for f_name, mongo_field in model_attrs.items():
-            if not cls.is_special_field(type(mongo_field)):
-                respective_field = cls.respective_fields()[type(mongo_field)]
+            if type(mongo_field) not in cls.SPECIAL_FIELDS:
+                respective_field = cls.RESPECTIVE_FIELDS[type(mongo_field)]
 
                 attrs[f_name] = respective_field
                 attrs['fields'][f_name] = respective_field
@@ -155,9 +150,9 @@ class MongraphSchema(type):
                 # need to resolve type that this list has
                 list_type = type(mongo_field.field)
 
-                if not cls.is_special_field(list_type):
+                if list_type not in cls.SPECIAL_FIELDS:
                     # this is necessary because of graphene.List must receive a class not a instance
-                    respective_field = type(cls.respective_fields()[list_type])
+                    respective_field = type(cls.RESPECTIVE_FIELDS[list_type])
                     attrs[f_name] = graphene.List(respective_field)
                 else:
                     Schema = references.get(f_name)
