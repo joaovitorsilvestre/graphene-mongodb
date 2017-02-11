@@ -79,9 +79,9 @@ class UserSchema(metaclass=MongraphSchema):
     __REF__ = {'bank': BankSchema, 'posts': PostsSchema}
 
 class Query(graphene.ObjectType):
-    country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.resolve_self)
-    bank = graphene.Field(BankSchema, **BankSchema.fields, resolver=BankSchema.resolve_self)
-    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolve_self)
+    country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.resolver_self)
+    bank = graphene.Field(BankSchema, **BankSchema.fields, resolver=BankSchema.resolver_self)
+    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolver_self)
 
 schema = graphene.Schema(query=Query)
 

@@ -109,7 +109,7 @@ class MongraphSchema(type):
         # generate the graphene class
         subclass = type(class_name, (graphene.ObjectType,), attrs)
 
-        setattr(subclass, 'resolve_self', classmethod(cls.resolver_self))
+        setattr(subclass, 'resolver_self', classmethod(cls.resolver_self))
         setattr(subclass, 'resolver_self_list', classmethod(cls.resolver_self_list))
 
         return subclass
@@ -150,7 +150,7 @@ class MongraphSchema(type):
                 attrs['fields'][f_name] = respective_field
             elif type(mongo_field) == ReferenceField:
                 Schema = references.get(f_name)
-                attrs[f_name] = graphene.Field(Schema, **Schema.fields, resolver=Schema.resolve_self)
+                attrs[f_name] = graphene.Field(Schema, **Schema.fields, resolver=Schema.resolver_self)
             elif type(mongo_field) == ListField:
                 # need to resolve type that this list has
                 list_type = type(mongo_field.field)
