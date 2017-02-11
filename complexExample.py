@@ -79,6 +79,7 @@ schema = graphene.Schema(query=Query)
 
 result = schema.execute("""query Data {
     user(username: "John") {
+        id
         username
         password
         active

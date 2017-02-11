@@ -86,8 +86,8 @@ class MongraphSchema(type):
         MODEL = attrs.get('__MODEL__')
         REF = attrs.get('__REF__') or {}
 
-        model_attrs = {k: v for k, v in MODEL._fields.items() if k != 'id'}   # key: fields name, value: type of mongoField
-        references = {k: v for k, v in REF.items()}                                 # key: name of field, value: Schema
+        model_attrs = {k: v for k, v in MODEL._fields.items()}   # key: fields name, value: type of mongoField
+        references = {k: v for k, v in REF.items()}                           # key: name of field, value: Schema
 
         ## this is used to easy way to pass this Schema fields as second paramter to graphene.Field
         # For instance, graphene.Field(UserSchema, **UserSchema.fields, resolver ...
@@ -118,7 +118,8 @@ class MongraphSchema(type):
             BooleanField: graphene.Boolean(),
             IntField: graphene.Int(),
             FloatField: graphene.Float(),
-            DateTimeField: DateTime()
+            DateTimeField: DateTime(),
+            ObjectIdField: graphene.ID()
         }
 
     @classmethod
