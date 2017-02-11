@@ -8,7 +8,7 @@ from MongographQL import MongraphSchema
 connect('MongraphQL-Tests')
 
 def generate_query_result(fields):
-    attrs = {name: graphene.Field(schema, **schema.fields, resolver=schema.resolver_self)
+    attrs = {name: graphene.Field(schema, **schema.fields, resolver=schema.auto_resolver)
              for name, schema in fields.items()}
 
     subclass = type('Query', (graphene.ObjectType,), attrs)
@@ -17,7 +17,12 @@ def generate_query_result(fields):
 def execute_query(schema, query):
     _query = generate_query_result({'user': schema})
     _schema = graphene.Schema(query=_query)
-    return json.loads(json.dumps(_schema.execute(query).data))
+
+    result = _schema.execute(query)
+    if not result:
+        raise(Exception, 'Query retornando None')
+
+    return json.loads(json.dumps(result.data))
 
 def test_MongoSchema_string():
     class User(Document):
