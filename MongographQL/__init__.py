@@ -21,15 +21,23 @@ class Utils:
         mongoObject = grapheneObject.__MODEL__
 
         fields = [k for k, v in Utils.get_fields(info).items() if k[:2] != '__']
-        users = mongoObject.objects(**args).only(*fields)
+        results = mongoObject.objects(**args).only(*fields)
 
-        if users:
+        if results:
             def get_user_attrs(u):
                 return {f: getattr(u, f) for f in fields}
 
-            return [grapheneObject(**get_user_attrs(u)) for u in users]
+            return [grapheneObject(**get_user_attrs(u)) for u in results]
         else:
             return []
+
+    @staticmethod
+    def parse_field(field):
+        """ parse if the field returned by the query is a dict, PointField has that behavior """
+        if isinstance(field, dict):
+            if 'coordinates' in field:
+                return field['coordinates']
+        return field
 
     @staticmethod
     def generic_resolver(grapheneObject, args, info):
@@ -42,6 +50,8 @@ class Utils:
 
         if result:
             a = {f: getattr(result, f) for f in fields}
+            a = {k: Utils.parse_field(v) for k, v in a.items()}
+
             return grapheneObject(**a)
         else:
             return None
@@ -125,7 +135,7 @@ class MongraphSchema(type):
 
     @classmethod
     def is_special_field(cls, mongo_field):
-        special_fields = [ReferenceField, ListField]
+        special_fields = [ReferenceField, ListField, PointField]
         return mongo_field in special_fields
 
     @classmethod
@@ -150,6 +160,8 @@ class MongraphSchema(type):
                 else:
                     Schema = references.get(f_name)
                     attrs[f_name] = graphene.List(Schema, **Schema.fields, resolver=Schema.resolver_self_list)
+            elif type(mongo_field) == PointField:
+                attrs[f_name] = graphene.List(graphene.Float)
 
         return attrs
 
