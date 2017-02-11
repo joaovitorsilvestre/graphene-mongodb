@@ -119,7 +119,8 @@ class MongraphSchema(type):
             IntField: graphene.Int(),
             FloatField: graphene.Float(),
             DateTimeField: DateTime(),
-            ObjectIdField: graphene.ID()
+            ObjectIdField: graphene.ID(),
+            URLField: graphene.String()
         }
 
     @classmethod
