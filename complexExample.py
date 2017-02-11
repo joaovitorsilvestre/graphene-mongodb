@@ -40,6 +40,7 @@ class User(Document):
     posts = ListField(ReferenceField(Posts))
     favorite_colors = ListField(StringField())
     creation_date = DateTimeField()
+    site_url = URLField()
 
 user = User(username="John",
             password="123456789",
@@ -49,7 +50,8 @@ user = User(username="John",
             bank=bank,
             posts=[post1, post2],
             favorite_colors=['blue', 'red'],
-            creation_date=datetime.now()
+            creation_date=datetime.now(),
+            site_url="https://github.com/joaovitorsilvestre/MongographQL"
             )
 
 brazil.save()
@@ -98,6 +100,7 @@ result = schema.execute("""query Data {
         }
         favoriteColors
         creationDate
+        siteUrl
     }
 }""")
 
