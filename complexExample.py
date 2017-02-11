@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 
 from mongoengine import *
-from MongographQL import MongraphSchema, Utils
+from MongographQL import MongraphSchema, utils
 import graphene
 
 
@@ -79,9 +79,9 @@ class UserSchema(metaclass=MongraphSchema):
     __REF__ = {'bank': BankSchema, 'posts': PostsSchema}
 
 class Query(graphene.ObjectType):
-    country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.resolver_self)
-    bank = graphene.Field(BankSchema, **BankSchema.fields, resolver=BankSchema.resolver_self)
-    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolver_self)
+    country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.auto_resolver)
+    bank = graphene.Field(BankSchema, **BankSchema.fields, resolver=BankSchema.auto_resolver)
+    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.auto_resolver)
 
 schema = graphene.Schema(query=Query)
 

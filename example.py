@@ -25,7 +25,7 @@ class UserSchema(metaclass=MongraphSchema):
     __MODEL__ = User
 
 class Query(graphene.ObjectType):
-    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.resolver_self)
+    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.auto_resolver)
 
 schema = graphene.Schema(query=Query)
 
