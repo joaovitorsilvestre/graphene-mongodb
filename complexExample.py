@@ -26,9 +26,11 @@ brazil = Country(name="Brazil",
 class Bank(Document):
     name = StringField()
     country = ReferenceField(Country)
+    location = PointField()
 
 bank = Bank(name="Caixa",
-            country=brazil)
+            country=brazil,
+            location=[29.977291, 31.132493])
 
 class User(Document):
     username = StringField()
@@ -41,7 +43,7 @@ class User(Document):
     favorite_colors = ListField(StringField())
     creation_date = DateTimeField()
     site_url = URLField()
-    location = PointField()
+    personal_data = DictField()
 
 user = User(username="John",
             password="123456789",
@@ -53,7 +55,9 @@ user = User(username="John",
             favorite_colors=['blue', 'red'],
             creation_date=datetime.now(),
             site_url="https://github.com/joaovitorsilvestre/MongographQL",
-            location=[29.977291, 31.132493]
+            personal_data={"fullName": "John John",
+                           "passport": 15874512354,
+                           "children_names": ["Ross", "Chandler"]}
             )
 
 brazil.save()
@@ -91,6 +95,7 @@ result = schema.execute("""query Data {
         score
         bank {
             name
+            location
             country {
                 name
                 areaCode
@@ -103,7 +108,7 @@ result = schema.execute("""query Data {
         favoriteColors
         creationDate
         siteUrl
-        location
+        personalData
     }
 }""")
 
@@ -114,3 +119,4 @@ user.delete()
 bank.delete()
 post1.delete()
 post2.delete()
+brazil.delete()

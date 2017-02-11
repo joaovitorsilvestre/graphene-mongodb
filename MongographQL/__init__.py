@@ -4,6 +4,7 @@ from graphql.utils.ast_to_dict import ast_to_dict
 from mongoengine import *
 import graphene
 from graphene.types.datetime import DateTime
+from .custom_types import CustomDictField
 
 class Utils:
     @staticmethod
@@ -130,7 +131,8 @@ class MongraphSchema(type):
             FloatField: graphene.Float(),
             DateTimeField: DateTime(),
             ObjectIdField: graphene.ID(),
-            URLField: graphene.String()
+            URLField: graphene.String(),
+            DictField: CustomDictField()
         }
 
     @classmethod
