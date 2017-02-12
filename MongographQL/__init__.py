@@ -3,10 +3,15 @@ import graphene
 from graphene.types.datetime import DateTime
 from .custom_types import CustomDictField
 from .utils import Resolvers
+from six import with_metaclass
 
 
-class MongraphSchema(type):
+class MongraphSchemaMeta(type):
     def __new__(cls, class_name, parents, attrs):
+
+        if not parents:
+            return type.__new__(cls, class_name, parents, attrs)
+
         MODEL = attrs.get('__MODEL__')
         REF = attrs.get('__REF__') or {}
 
@@ -63,7 +68,7 @@ class MongraphSchema(type):
 
             elif type(mongo_field) == ReferenceField:
                 schema = references.get(f_name)
-                field = graphene.Field(schema, **schema.fields, resolver=schema.auto_resolver)
+                field = graphene.Field(schema, resolver=schema.auto_resolver, **schema.fields)
 
             elif type(mongo_field) == ListField:
                 ''' List Field can be of simple fields, lick String, but it also can be of special fields '''
@@ -77,7 +82,7 @@ class MongraphSchema(type):
                     #TODO but it can be another special field, as instance, PointField. Need to Fix that !!!
 
                     schema = references.get(f_name)
-                    field = graphene.List(schema, **schema.fields, resolver=schema.auto_resolver_list)
+                    field = graphene.List(schema, resolver=schema.auto_resolver_list, **schema.fields)
 
             elif type(mongo_field) == PointField:
                 ''' MongoEngine already treat to the PointField be a list of two items '''
@@ -86,3 +91,6 @@ class MongraphSchema(type):
             schema_attrs[f_name] = field
 
         return schema_attrs
+
+class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
+    pass

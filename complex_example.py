@@ -64,24 +64,28 @@ brazil.save()
 bank.save()
 user.save()
 
-class PostsSchema(metaclass=MongraphSchema):
+class PostsSchema(MongraphSchema):
     __MODEL__ = Posts
 
-class CountrySchema(metaclass=MongraphSchema):
+class CountrySchema(MongraphSchema):
     __MODEL__ = Country
 
-class BankSchema(metaclass=MongraphSchema):
+class BankSchema(MongraphSchema):
     __MODEL__ = Bank
     __REF__ = {'country': CountrySchema}
 
-class UserSchema(metaclass=MongraphSchema):
+class UserSchema(MongraphSchema):
     __MODEL__ = User
     __REF__ = {'bank': BankSchema, 'posts': PostsSchema}
 
 class Query(graphene.ObjectType):
-    country = graphene.Field(CountrySchema, **CountrySchema.fields, resolver=CountrySchema.auto_resolver)
-    bank = graphene.Field(BankSchema, **BankSchema.fields, resolver=BankSchema.auto_resolver)
-    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.auto_resolver)
+    user = graphene.Field(UserSchema, resolver=UserSchema.auto_resolver, **UserSchema.fields)
+
+    ## auto_resolver doesnt work in python 2.7, the follows code do the same job
+    # user = graphene.Field(UserSchema, **UserSchema.fields)
+    # def resolve_user(self, args, context, info):
+    #     from MongographQL.utils import Resolvers
+    #     return Resolvers.generic_resolver(UserSchema, args, info)
 
 schema = graphene.Schema(query=Query)
 

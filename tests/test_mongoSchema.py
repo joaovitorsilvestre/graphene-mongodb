@@ -1,18 +1,27 @@
 import json
-from collections import OrderedDict
+import sys
 
 import graphene
 from mongoengine import *
 from MongographQL import MongraphSchema
+from MongographQL.utils import Resolvers
 
 connect('MongraphQL-Tests')
 
+
 def generate_query_result(fields):
-    attrs = {name: graphene.Field(schema, **schema.fields, resolver=schema.auto_resolver)
-             for name, schema in fields.items()}
+    if sys.version_info[0] >= 3:
+        attrs = {name: graphene.Field(schema, resolver=schema.auto_resolver, **schema.fields)
+                 for name, schema in fields.items()}
+    else:
+        attrs = {name: graphene.Field(schema, **schema.fields)
+                 for name, schema in fields.items()}
+        for name, schema in fields.items():
+            attrs['resolve_' + name] = lambda self, args, context, info: Resolvers.generic_resolver(schema, args, info)
 
     subclass = type('Query', (graphene.ObjectType,), attrs)
     return subclass
+
 
 def execute_query(schema, query):
     _query = generate_query_result({'user': schema})
@@ -20,15 +29,16 @@ def execute_query(schema, query):
 
     result = _schema.execute(query)
     if not result:
-        raise(Exception, 'Query retornando None')
+        raise(Exception, 'Query is returning None')
 
     return json.loads(json.dumps(result.data))
+
 
 def test_MongoSchema_string():
     class User(Document):
         name = StringField()
 
-    class UserSchema(metaclass=MongraphSchema):
+    class UserSchema(MongraphSchema):
         __MODEL__ = User
 
     user = User(name="John")
@@ -44,11 +54,12 @@ def test_MongoSchema_string():
     assert result == {"user": {"name": "John"}}
     user.delete()
 
+
 def test_MongoSchema_float():
     class User(Document):
         score = FloatField()
 
-    class UserSchema(metaclass=MongraphSchema):
+    class UserSchema(MongraphSchema):
         __MODEL__ = User
 
     user = User(score=15.684520)
@@ -69,7 +80,7 @@ def test_MongoSchema_int():
     class User(Document):
         age = IntField()
 
-    class UserSchema(metaclass=MongraphSchema):
+    class UserSchema(MongraphSchema):
         __MODEL__ = User
 
     user = User(age=19)
@@ -85,11 +96,12 @@ def test_MongoSchema_int():
     assert result == {"user": {"age": 19}}
     user.delete()
 
+
 def test_MongoSchema_id():
     class User(Document):
         pass
 
-    class UserSchema(metaclass=MongraphSchema):
+    class UserSchema(MongraphSchema):
         __MODEL__ = User
 
     user = User()
@@ -106,12 +118,13 @@ def test_MongoSchema_id():
     assert result == {"user": {"id": str(user_from_db.id)}}
     user_from_db.delete()
 
+
 def test_MongoSchema_boolean():
     class User(Document):
         active = BooleanField()
         not_active = BooleanField()
 
-    class UserSchema(metaclass=MongraphSchema):
+    class UserSchema(MongraphSchema):
         __MODEL__ = User
 
     user = User(active=False, not_active=True)
@@ -127,36 +140,3 @@ def test_MongoSchema_boolean():
 
     assert result == {"user": {"active": False, "notActive": True}}
     user.delete()
-
-def test_MongoSchema_referenceField():
-    class Bank(Document):
-        name = StringField()
-
-    class User(Document):
-        bank = ReferenceField(Bank)
-
-    class Bankchema(metaclass=MongraphSchema):
-        __MODEL__ = Bank
-
-    class UserSchema(metaclass=MongraphSchema):
-        __MODEL__ = User
-        __REF__ = {'bank': Bankchema}
-
-    bank = Bank(name="Test Bank")
-    user = User(bank=bank)
-
-    bank.save()
-    user.save()
-
-    result = execute_query(UserSchema,
-                           """ query testQuery {
-                               user {
-                                   bank {
-                                       name
-                                   }
-                               }
-                           }""")
-
-    assert result == {"user": {"bank": {"name": "Test Bank"}}}
-    user.delete()
-    bank.delete()
