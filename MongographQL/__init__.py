@@ -1,7 +1,7 @@
 from mongoengine import *
 import graphene
 from graphene.types.datetime import DateTime
-from .custom_types import CustomDictField
+from .custom_fields import *
 from .utils import Resolvers
 from six import with_metaclass
 
@@ -45,10 +45,14 @@ class MongraphSchemaMeta(type):
         DateTimeField: DateTime(),
         ObjectIdField: graphene.ID(),
         URLField: graphene.String(),
-        DictField: CustomDictField()
+        DictField: CustomDictField(),
+        EmailField: CustomEmailField(),
+        LongField: CustomLongField(),
+        DecimalField: CustomDecimalField(),
+        BinaryField: CustpmBinaryField()
     }
 
-    SPECIAL_FIELDS = [ReferenceField, ListField, PointField]
+    SPECIAL_FIELDS = [ReferenceField, ListField, PointField, SortedListField]
 
     @classmethod
     def convert_fields(cls, schema_attrs, model_attrs, references):
@@ -70,7 +74,7 @@ class MongraphSchemaMeta(type):
                 schema = references.get(f_name)
                 field = graphene.Field(schema, resolver=schema.auto_resolver, **schema.fields)
 
-            elif type(mongo_field) == ListField:
+            elif type(mongo_field) == ListField or type(mongo_field) == SortedListField:
                 ''' List Field can be of simple fields, lick String, but it also can be of special fields '''
                 list_items_type = type(mongo_field.field)
 
@@ -85,8 +89,7 @@ class MongraphSchemaMeta(type):
                     field = graphene.List(schema, resolver=schema.auto_resolver_list, **schema.fields)
 
             elif type(mongo_field) == PointField:
-                ''' MongoEngine already treat to the PointField be a list of two items '''
-                field = graphene.List(graphene.Float)
+                field = CustomDictField()
 
             schema_attrs[f_name] = field
 

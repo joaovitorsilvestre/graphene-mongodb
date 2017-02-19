@@ -34,7 +34,6 @@ bank = Bank(name="Caixa",
 
 class User(Document):
     username = StringField()
-    password = StringField()
     active = BooleanField()
     age = IntField()
     score = FloatField()
@@ -44,9 +43,14 @@ class User(Document):
     creation_date = DateTimeField()
     site_url = URLField()
     personal_data = DictField()
+    email = EmailField()
+    super_id = LongField()
+    remember_pi = DecimalField(min_value=3.1, max_value=3.15, precision=11)
+    ordered_favorite_colors = SortedListField(StringField())
+    nickname= BinaryField()
+
 
 user = User(username="John",
-            password="123456789",
             active=True,
             age=18,
             score=5.5,
@@ -57,7 +61,12 @@ user = User(username="John",
             site_url="https://github.com/joaovitorsilvestre/MongographQL",
             personal_data={"fullName": "John John",
                            "passport": 15874512354,
-                           "children_names": ["Ross", "Chandler"]}
+                           "children_names": ["Ross", "Chandler"]},
+            email="John@server.com",
+            super_id=9223372036854775807,
+            remember_pi=3.14159265359,
+            ordered_favorite_colors=['red', 'blue'],
+            nickname=b'John armless'
             )
 
 brazil.save()
@@ -93,7 +102,6 @@ result = schema.execute("""query Data {
     user(username: "John") {
         id
         username
-        password
         active
         age
         score
@@ -113,6 +121,11 @@ result = schema.execute("""query Data {
         creationDate
         siteUrl
         personalData
+        email
+        superId
+        rememberPi
+        orderedFavoriteColors
+        nickname
     }
 }""")
 
