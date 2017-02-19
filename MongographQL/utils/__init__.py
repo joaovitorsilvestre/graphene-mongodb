@@ -28,10 +28,11 @@ class Resolvers:
         result = mongo_object.objects(**args).only(*fields).first()
 
         if result:
-            a = {f: getattr(result, f) for f in fields}
-            a = {k: parse_field(v) for k, v in a.items()}
+            args_with_data = {f: getattr(result, f) for f in fields}
 
-            return graphene_object(**a)
+            print(args_with_data)
+
+            return graphene_object(**args_with_data)
         else:
             return None
 
@@ -43,12 +44,6 @@ def convert_camel_case(string):
     res = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', string)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', res).lower()
 
-def parse_field(field):
-    """ parse if the field returned by the query is a dict, PointField has that behavior """
-    if isinstance(field, dict):
-        if 'coordinates' in field:
-            return field['coordinates']
-    return field
 
 # author: mixxorz
 def collect_fields(node, fragments):

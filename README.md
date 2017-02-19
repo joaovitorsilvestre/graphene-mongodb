@@ -32,10 +32,10 @@ class Query(graphene.ObjectType):
 ```
 Note that the example has a bit of 'duplicated' code in this example. 
 
-The proprosal of MongographQL is to make it cleaner and do all the work of query's and resolve things in background for you:
+The proposal of MongographQL is to make it cleaner and do all the work of query's and resolve things in background for you:
 
 ```python
-class UserSchema(metaclass=MongraphSchema):
+class UserSchema(MongraphSchema):
     __MODEL__ = User
     
 class Query(graphene.ObjectType):
@@ -43,7 +43,7 @@ class Query(graphene.ObjectType):
 ```
 <br>
 
-MongographQL has suport for ReferenceField, and to use it you'll need to has already created the schema of the referenced document to MongraphSchema know how handle it:
+MongographQL has support for ReferenceField, and to use it you'll need to has already created the schema of the referenced document to MongraphSchema know how handle it:
 ```python
 class User(Document):   
     name = StringField()
@@ -53,10 +53,10 @@ class Post(Document):
     title = StringField()
     body = StringField()
        
-class UserSchema(metaclass=MongraphSchema):
+class UserSchema(MongraphSchema):
     __MODEL__ = User
 
-class SchemaPost(metaclass=MongraphSchema):
+class SchemaPost(MongraphSchema):
     __MODEL__ = Post
     __REF__ = {'author': UserSchema}
 ```
@@ -77,3 +77,8 @@ class SchemaPost(metaclass=MongraphSchema):
 * URLField
 * PointField
 * DictField
+* EmailField
+* LongField
+* DecimalField
+* BinaryField
+* SortedListField
