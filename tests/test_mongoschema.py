@@ -1,4 +1,3 @@
-from datetime import datetime
 from tests.utils import MongographQLTestCase
 from mongoengine import *
 
