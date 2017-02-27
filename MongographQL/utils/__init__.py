@@ -1,6 +1,6 @@
-import re
-
 from graphql.utils.ast_to_dict import ast_to_dict
+from graphene.utils.str_converters import to_snake_case
+
 
 class Resolvers:
     @staticmethod
@@ -23,26 +23,15 @@ class Resolvers:
         mongo_object = graphene_object.__MODEL__
 
         fields = [k for k, v in get_fields(info).items() if k[:2] != '__']
-        fields = [convert_camel_case(f) for f in fields]
+        fields = [to_snake_case(f) for f in fields]
 
         result = mongo_object.objects(**args).only(*fields).first()
 
         if result:
             args_with_data = {f: getattr(result, f) for f in fields}
-
-            print(args_with_data)
-
             return graphene_object(**args_with_data)
         else:
             return None
-
-def with_metaclass(*args, **kwargs):
-    from six import with_metaclass as six_with_metaclass
-    return six_with_metaclass(*args, **kwargs)
-
-def convert_camel_case(string):
-    res = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', string)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', res).lower()
 
 
 # author: mixxorz
@@ -59,6 +48,7 @@ def collect_fields(node, fragments):
                 field.update(collect_fields(fragments[leaf['name']['value']], fragments))
 
     return field
+
 
 # author: mixxorz
 def get_fields(info):
