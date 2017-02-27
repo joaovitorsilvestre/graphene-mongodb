@@ -1,9 +1,32 @@
+from six import with_metaclass
 from mongoengine import *
 import graphene
 from graphene.types.datetime import DateTime
 from .custom_fields import *
 from .utils import Resolvers
-from six import with_metaclass
+
+
+RESPECTIVE_FIELDS = {
+    StringField: graphene.String,
+    BooleanField: graphene.Boolean,
+    IntField: graphene.Int,
+    FloatField: graphene.Float,
+    DateTimeField: DateTime,
+    ObjectIdField: graphene.ID,
+    URLField: graphene.String,
+    DictField: GenericField,
+    EmailField: GenericField,
+    LongField: GenericField,
+    DecimalField: CustomDecimalField,
+    BinaryField: CustomBinaryField,
+    PointField: GenericField,
+}
+
+RESPECTIVE_SPECIAL_FIELDS = {
+    ReferenceField: SpecialFields.reference_field,
+    ListField: SpecialFields.list_field,
+    SortedListField: SpecialFields.list_field
+}
 
 
 class MongraphSchemaMeta(type):
@@ -37,63 +60,24 @@ class MongraphSchemaMeta(type):
         """ this function will be passed to generated subclass """
         return Resolvers.generic_resolver_list(self, args, info)
 
-    RESPECTIVE_FIELDS = {
-        StringField: graphene.String(),
-        BooleanField: graphene.Boolean(),
-        IntField: graphene.Int(),
-        FloatField: graphene.Float(),
-        DateTimeField: DateTime(),
-        ObjectIdField: graphene.ID(),
-        URLField: graphene.String(),
-        DictField: CustomDictField(),
-        EmailField: CustomEmailField(),
-        LongField: CustomLongField(),
-        DecimalField: CustomDecimalField(),
-        BinaryField: CustpmBinaryField()
-    }
-
-    SPECIAL_FIELDS = [ReferenceField, ListField, PointField, SortedListField]
-
     @classmethod
     def convert_fields(cls, schema_attrs, model_attrs, references):
-        """ Convert each field of MongoEngine Document to the respective field of Graphene """
-
         for f_name, mongo_field in model_attrs.items():
-
-            field = None
-
-            if type(mongo_field) not in cls.SPECIAL_FIELDS:
-                ''' If the field doesn't need any special treatment '''
-                field = cls.RESPECTIVE_FIELDS[type(mongo_field)]
-
-                # That is used as an easy way to pass this Schema fields as second parameter to graphene.Field
-                # For instance, graphene.Field(UserSchema, **UserSchema.fields, resolver ...
-                schema_attrs['fields'][f_name] = field
-
-            elif type(mongo_field) == ReferenceField:
-                schema = references.get(f_name)
-                field = graphene.Field(schema, resolver=schema.auto_resolver, **schema.fields)
-
-            elif type(mongo_field) == ListField or type(mongo_field) == SortedListField:
-                ''' List Field can be of simple fields, lick String, but it also can be of special fields '''
-                list_items_type = type(mongo_field.field)
-
-                if list_items_type not in cls.SPECIAL_FIELDS:
-                    # this is necessary because of graphene.List must receive a class not a instance
-                    field = graphene.List(type(cls.RESPECTIVE_FIELDS[list_items_type]))
-                else:
-                    #TODO Here the code is assuming that if the type of list is special, it's everytime referenceField
-                    #TODO but it can be another special field, as instance, PointField. Need to Fix that !!!
-
-                    schema = references.get(f_name)
-                    field = graphene.List(schema, resolver=schema.auto_resolver_list, **schema.fields)
-
-            elif type(mongo_field) == PointField:
-                field = CustomDictField()
-
+            field = cls.to_respective(f_name, mongo_field, references)
             schema_attrs[f_name] = field
 
+            if type(mongo_field) in RESPECTIVE_FIELDS:
+                schema_attrs['fields'][f_name] = field
+
         return schema_attrs
+
+    @classmethod
+    def to_respective(cls, f_name, mongo_field, references):
+        if type(mongo_field) in RESPECTIVE_FIELDS:
+            return RESPECTIVE_FIELDS[type(mongo_field)]()
+        else:
+            return RESPECTIVE_SPECIAL_FIELDS[type(mongo_field)](f_name, mongo_field, references, RESPECTIVE_FIELDS)
+
 
 class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
     pass
