@@ -52,6 +52,14 @@ class MongraphSchemaMeta(type):
 
         return subclass
 
+    OPERATORS = {
+        'in': lambda field: graphene.List(type(field)),
+        'nin': lambda field: graphene.List(type(field)),
+    }
+
+    STRING_OPERATORS = ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith',
+                        'endswith', 'iendswith', 'match']
+
     def auto_resolver(self, root, args, contex, info):
         """ this function will be passed to generated subclass """
         return Resolvers.generic_resolver(self, args, info)
@@ -65,11 +73,24 @@ class MongraphSchemaMeta(type):
         for f_name, mongo_field in model_attrs.items():
             field = cls.to_respective(f_name, mongo_field, references)
             schema_attrs[f_name] = field
-
-            if type(mongo_field) in RESPECTIVE_FIELDS:
-                schema_attrs['fields'][f_name] = field
+            schema_attrs['fields'].update(cls.add_operators(f_name, mongo_field, field))
 
         return schema_attrs
+
+    @classmethod
+    def add_operators(cls, f_name, mongo_field, field):
+        result = {}
+        if type(mongo_field) in RESPECTIVE_FIELDS:
+            result[f_name] = field
+
+            for op_name, op in cls.OPERATORS.items():
+                result[f_name + '__' + op_name] = op(field)
+
+            if type(mongo_field) == StringField:
+                for op in cls.STRING_OPERATORS:
+                    result[f_name + '__' + op] = graphene.String()
+
+        return result
 
     @classmethod
     def to_respective(cls, f_name, mongo_field, references):
