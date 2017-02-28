@@ -1,32 +1,10 @@
 from six import with_metaclass
-from mongoengine import *
+from mongoengine import StringField, ReferenceField
 import graphene
-from graphene.types.datetime import DateTime
-from .custom_fields import *
+
+from .custom_fields import RESPECTIVE_FIELDS, RESPECTIVE_SPECIAL_FIELDS, GenericField, CustomDecimalField, \
+    CustomBinaryField, SpecialFields
 from .utils import Resolvers
-
-
-RESPECTIVE_FIELDS = {
-    StringField: graphene.String,
-    BooleanField: graphene.Boolean,
-    IntField: graphene.Int,
-    FloatField: graphene.Float,
-    DateTimeField: DateTime,
-    ObjectIdField: graphene.ID,
-    URLField: graphene.String,
-    DictField: GenericField,
-    EmailField: GenericField,
-    LongField: GenericField,
-    DecimalField: CustomDecimalField,
-    BinaryField: CustomBinaryField,
-    PointField: GenericField,
-}
-
-RESPECTIVE_SPECIAL_FIELDS = {
-    ReferenceField: SpecialFields.reference_field,
-    ListField: SpecialFields.list_field,
-    SortedListField: SpecialFields.list_field
-}
 
 
 class MongraphSchemaMeta(type):
@@ -38,17 +16,17 @@ class MongraphSchemaMeta(type):
         MODEL = attrs.get('__MODEL__')
 
         model_attrs = {k: v for k, v in MODEL._fields.items()}   # key: fields name, value: type of mongoField
-        attrs['fields'] = {}                                     # Shortcut to pass graphene fields
+        attrs['fields'] = {}                                     # Fields that appear in paramters (with operators)
 
         attrs = cls.convert_fields(attrs, model_attrs)  # all fields converted to respective graphene
 
         # generate the graphene class
-        subclass = type(class_name, (graphene.ObjectType,), attrs)
+        graphene_object_class = type(class_name, (graphene.ObjectType,), attrs)
 
-        setattr(subclass, 'auto_resolver', classmethod(cls.auto_resolver))
-        setattr(subclass, 'auto_resolver_list', classmethod(cls.auto_resolver_list))
+        setattr(graphene_object_class, 'auto_resolver', classmethod(cls.auto_resolver))
+        setattr(graphene_object_class, 'auto_resolver_list', classmethod(cls.auto_resolver_list))
 
-        return subclass
+        return graphene_object_class
 
     # Store schemas of Documents already generated (Memoization)
     _generated_schemas = {}
@@ -90,6 +68,9 @@ class MongraphSchemaMeta(type):
             if type(mongo_field) == StringField:
                 for op in cls._STRING_OPERATORS:
                     result[f_name + '__' + op] = graphene.String()
+        elif isinstance(mongo_field, ReferenceField):
+            for op_name in cls._OPERATORS:
+                result[f_name + '__' + op_name] = graphene.List(graphene.String)
 
         return result
 
