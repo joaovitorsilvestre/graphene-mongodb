@@ -2,36 +2,29 @@ from graphql.utils.ast_to_dict import ast_to_dict
 from graphene.utils.str_converters import to_snake_case
 
 
-class Resolvers:
-    @staticmethod
-    def generic_resolver_list(graphene_object, args, info):
-        mongo_object = graphene_object.__MODEL__
+def generic_resolver(graphene_object, args, info, is_list=False):
+    ''' An generic resolver to auto handle query's and return graphene objects with the data '''
 
-        fields = [k for k, v in get_fields(info).items() if k[:2] != '__MODEL__']
-        results = mongo_object.objects(**args).only(*fields)
+    mongo_doc = graphene_object.__MODEL__
 
-        if results:
-            def get_user_attrs(u):
-                return {f: getattr(u, f) for f in fields}
+    fields = [k for k, v in get_fields(info).items() if k != '__MODEL__']
+    fields = [to_snake_case(f) for f in fields]
 
-            return [graphene_object(**get_user_attrs(u)) for u in results]
-        else:
-            return []
+    if is_list:
+        result = mongo_doc.objects(**args).only(*fields)
+    else:
+        result = mongo_doc.objects(**args).only(*fields).first()
 
-    @staticmethod
-    def generic_resolver(graphene_object, args, info):
-        mongo_object = graphene_object.__MODEL__
+    if result and is_list:
+        def get_document_attrs(doc):
+            return {f: getattr(doc, f) for f in fields}
 
-        fields = [k for k, v in get_fields(info).items() if k != '__MODEL__']
-        fields = [to_snake_case(f) for f in fields]
-
-        result = mongo_object.objects(**args).only(*fields).first()
-
-        if result:
-            args_with_data = {f: getattr(result, f) for f in fields}
-            return graphene_object(**args_with_data)
-        else:
-            return None
+        return [graphene_object(**get_document_attrs(doc)) for doc in result]
+    elif result and not is_list:
+        args_with_data = {f: getattr(result, f) for f in fields}
+        return graphene_object(**args_with_data)
+    else:
+        return [] if is_list else None
 
 
 def generate_schema(document, f_name):
@@ -53,6 +46,7 @@ def generate_schema(document, f_name):
         schema = MongraphSchema._generated_schemas.get(document)
 
     return schema
+
 
 # author: mixxorz
 def collect_fields(node, fragments):
