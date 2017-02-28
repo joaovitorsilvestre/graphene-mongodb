@@ -4,7 +4,7 @@ import graphene
 
 from .custom_fields import RESPECTIVE_FIELDS, RESPECTIVE_SPECIAL_FIELDS, GenericField, CustomDecimalField, \
     CustomBinaryField, SpecialFields
-from .utils import Resolvers
+from .utils import generic_resolver
 
 
 class MongraphSchemaMeta(type):
@@ -41,11 +41,11 @@ class MongraphSchemaMeta(type):
 
     def auto_resolver(self, root, args, contex, info):
         """ this function will be passed to generated subclass """
-        return Resolvers.generic_resolver(self, args, info)
+        return generic_resolver(self, args, info)
 
     def auto_resolver_list(self, root, args, context, info):
         """ this function will be passed to generated subclass """
-        return Resolvers.generic_resolver_list(self, args, info)
+        return generic_resolver(self, args, info, is_list=True)
 
     @classmethod
     def convert_fields(cls, schema_attrs, model_attrs):
@@ -55,6 +55,13 @@ class MongraphSchemaMeta(type):
             schema_attrs['fields'].update(cls.add_operators(f_name, mongo_field, field))
 
         return schema_attrs
+
+    @classmethod
+    def to_respective(cls, f_name, mongo_field):
+        if type(mongo_field) in RESPECTIVE_FIELDS:
+            return RESPECTIVE_FIELDS[type(mongo_field)]()
+        else:
+            return RESPECTIVE_SPECIAL_FIELDS[type(mongo_field)](f_name, mongo_field, RESPECTIVE_FIELDS)
 
     @classmethod
     def add_operators(cls, f_name, mongo_field, field):
@@ -73,13 +80,6 @@ class MongraphSchemaMeta(type):
                 result[f_name + '__' + op_name] = graphene.List(graphene.String)
 
         return result
-
-    @classmethod
-    def to_respective(cls, f_name, mongo_field):
-        if type(mongo_field) in RESPECTIVE_FIELDS:
-            return RESPECTIVE_FIELDS[type(mongo_field)]()
-        else:
-            return RESPECTIVE_SPECIAL_FIELDS[type(mongo_field)](f_name, mongo_field, RESPECTIVE_FIELDS)
 
 
 class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
