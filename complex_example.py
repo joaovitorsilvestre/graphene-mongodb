@@ -81,11 +81,9 @@ class CountrySchema(MongraphSchema):
 
 class BankSchema(MongraphSchema):
     __MODEL__ = Bank
-    __REF__ = {'country': CountrySchema}
 
 class UserSchema(MongraphSchema):
     __MODEL__ = User
-    __REF__ = {'bank': BankSchema, 'posts': PostsSchema}
 
 class Query(graphene.ObjectType):
     user = graphene.Field(UserSchema, resolver=UserSchema.auto_resolver, **UserSchema.fields)

@@ -36,13 +36,11 @@ class MongraphSchemaMeta(type):
             return type.__new__(cls, class_name, parents, attrs)
 
         MODEL = attrs.get('__MODEL__')
-        REF = attrs.get('__REF__') or {}
 
         model_attrs = {k: v for k, v in MODEL._fields.items()}   # key: fields name, value: type of mongoField
-        references = {k: v for k, v in REF.items()}              # key: name of field, value: Schema
         attrs['fields'] = {}                                     # Shortcut to pass graphene fields
 
-        attrs = cls.convert_fields(attrs, model_attrs, references)  # all fields converted to respective graphene
+        attrs = cls.convert_fields(attrs, model_attrs)  # all fields converted to respective graphene
 
         # generate the graphene class
         subclass = type(class_name, (graphene.ObjectType,), attrs)
@@ -52,12 +50,15 @@ class MongraphSchemaMeta(type):
 
         return subclass
 
-    OPERATORS = {
+    # Store schemas of Documents already generated (Memoization)
+    _generated_schemas = {}
+
+    _OPERATORS = {
         'in': lambda field: graphene.List(type(field)),
         'nin': lambda field: graphene.List(type(field)),
     }
 
-    STRING_OPERATORS = ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith',
+    _STRING_OPERATORS = ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith',
                         'endswith', 'iendswith', 'match']
 
     def auto_resolver(self, root, args, contex, info):
@@ -69,9 +70,9 @@ class MongraphSchemaMeta(type):
         return Resolvers.generic_resolver_list(self, args, info)
 
     @classmethod
-    def convert_fields(cls, schema_attrs, model_attrs, references):
+    def convert_fields(cls, schema_attrs, model_attrs):
         for f_name, mongo_field in model_attrs.items():
-            field = cls.to_respective(f_name, mongo_field, references)
+            field = cls.to_respective(f_name, mongo_field)
             schema_attrs[f_name] = field
             schema_attrs['fields'].update(cls.add_operators(f_name, mongo_field, field))
 
@@ -83,21 +84,21 @@ class MongraphSchemaMeta(type):
         if type(mongo_field) in RESPECTIVE_FIELDS:
             result[f_name] = field
 
-            for op_name, op in cls.OPERATORS.items():
+            for op_name, op in cls._OPERATORS.items():
                 result[f_name + '__' + op_name] = op(field)
 
             if type(mongo_field) == StringField:
-                for op in cls.STRING_OPERATORS:
+                for op in cls._STRING_OPERATORS:
                     result[f_name + '__' + op] = graphene.String()
 
         return result
 
     @classmethod
-    def to_respective(cls, f_name, mongo_field, references):
+    def to_respective(cls, f_name, mongo_field):
         if type(mongo_field) in RESPECTIVE_FIELDS:
             return RESPECTIVE_FIELDS[type(mongo_field)]()
         else:
-            return RESPECTIVE_SPECIAL_FIELDS[type(mongo_field)](f_name, mongo_field, references, RESPECTIVE_FIELDS)
+            return RESPECTIVE_SPECIAL_FIELDS[type(mongo_field)](f_name, mongo_field, RESPECTIVE_FIELDS)
 
 
 class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
