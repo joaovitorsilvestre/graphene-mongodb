@@ -43,23 +43,6 @@ class Query(graphene.ObjectType):
 ```
 <br>
 
-MongographQL has support for ReferenceField, and to use it you'll need to has already created the schema of the referenced document to MongraphSchema know how handle it:
-```python
-class User(Document):   
-    name = StringField()
-
-class Post(Document):
-    author = ReferenceField(User)
-    title = StringField()
-    body = StringField()
-       
-class UserSchema(MongraphSchema):
-    __MODEL__ = User
-
-class SchemaPost(MongraphSchema):
-    __MODEL__ = Post
-    __REF__ = {'author': UserSchema}
-```
 ### Examples
 <a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" >Simple example</a>
 <br>
