@@ -1,5 +1,10 @@
+import graphene
 from graphene.types import Scalar
-from graphene import Field, List, Boolean
+from graphene.types.datetime import DateTime
+from mongoengine import StringField, BooleanField, IntField, FloatField, DateTimeField, ObjectIdField, URLField, \
+    DictField, EmailField, LongField, DecimalField, BinaryField, PointField, ReferenceField, ListField, SortedListField
+
+from MongographQL.utils import generate_schema
 
 
 class GenericField(Scalar):
@@ -27,40 +32,51 @@ class SpecialFields:
     def reference_field(f_name, mongo_field, RESPECTIVE_FIELDS, document=None):
         ''' Generate a schema for RefereceField, or get a schema already done saved in _generated_schemas '''
 
-        from MongographQL import MongraphSchema
 
         if not document:
             document = mongo_field.document_type_obj
 
-        if hasattr(document, 'parent'):
+        if isinstance(document, str):
             ''' Avoid recursion, for instance, a Document has a ReferenceField('self'), when generate
                 a schema, it'll do it infinitly '''
 
             #TODO find a way to generate a schema for ReferenceField('self') without has a maximum recursion
-            return Field(Boolean)
+            return graphene.Field(graphene.Boolean)
 
-        if document not in MongraphSchema._generated_schemas:
-            ''' Memoize generated schema '''
-
-            schema = type(f_name, (MongraphSchema,), {
-                '__MODEL__': document
-            })
-            MongraphSchema._generated_schemas.update({
-                document: schema
-            })
-        else:
-            schema = MongraphSchema._generated_schemas.get(document)
-
-        return Field(schema, resolver=schema.auto_resolver, **schema.fields)
+        schema = generate_schema(document, f_name)
+        return graphene.Field(schema)
 
     @staticmethod
     def list_field(f_name, mongo_field, RESPECTIVE_FIELDS):
         list_items_type = type(mongo_field.field)
 
         if list_items_type in RESPECTIVE_FIELDS:
-            return List(type(RESPECTIVE_FIELDS[list_items_type]()))
+            return graphene.List(type(RESPECTIVE_FIELDS[list_items_type]()))
         else:
-            return SpecialFields.reference_field(f_name,
-                                                 mongo_field,
-                                                 RESPECTIVE_FIELDS,
-                                                 document=mongo_field.field.document_type)
+            document = mongo_field.field.document_type
+
+            schema = generate_schema(document, f_name)
+            return graphene.List(schema)
+
+
+RESPECTIVE_FIELDS = {
+    StringField: graphene.String,
+    BooleanField: graphene.Boolean,
+    IntField: graphene.Int,
+    FloatField: graphene.Float,
+    DateTimeField: DateTime,
+    ObjectIdField: graphene.ID,
+    URLField: graphene.String,
+    DictField: GenericField,
+    EmailField: GenericField,
+    LongField: GenericField,
+    DecimalField: CustomDecimalField,
+    BinaryField: CustomBinaryField,
+    PointField: GenericField,
+}
+
+RESPECTIVE_SPECIAL_FIELDS = {
+    ReferenceField: SpecialFields.reference_field,
+    ListField: SpecialFields.list_field,
+    SortedListField: SpecialFields.list_field
+}

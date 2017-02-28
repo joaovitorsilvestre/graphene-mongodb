@@ -7,7 +7,7 @@ class Resolvers:
     def generic_resolver_list(graphene_object, args, info):
         mongo_object = graphene_object.__MODEL__
 
-        fields = [k for k, v in get_fields(info).items() if k[:2] != '__']
+        fields = [k for k, v in get_fields(info).items() if k[:2] != '__MODEL__']
         results = mongo_object.objects(**args).only(*fields)
 
         if results:
@@ -22,7 +22,7 @@ class Resolvers:
     def generic_resolver(graphene_object, args, info):
         mongo_object = graphene_object.__MODEL__
 
-        fields = [k for k, v in get_fields(info).items() if k[:2] != '__']
+        fields = [k for k, v in get_fields(info).items() if k != '__MODEL__']
         fields = [to_snake_case(f) for f in fields]
 
         result = mongo_object.objects(**args).only(*fields).first()
@@ -33,6 +33,26 @@ class Resolvers:
         else:
             return None
 
+
+def generate_schema(document, f_name):
+    ''' Generate a schema for ReferenceField and memoize it to MongraphSchema
+        If the schema already has been generated, it'll will be returned
+    '''
+    from MongographQL import MongraphSchema
+
+    if document not in MongraphSchema._generated_schemas:
+        ''' Generate schema and memoize it '''
+
+        schema = type(f_name, (MongraphSchema,), {
+            '__MODEL__': document
+        })
+        MongraphSchema._generated_schemas.update({
+            document: schema
+        })
+    else:
+        schema = MongraphSchema._generated_schemas.get(document)
+
+    return schema
 
 # author: mixxorz
 def collect_fields(node, fragments):
