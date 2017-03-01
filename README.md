@@ -65,3 +65,9 @@ class Query(graphene.ObjectType):
 * DecimalField
 * BinaryField
 * SortedListField
+
+### Run tests
+``` bash
+> py.test --cov MongographQL --verbose
+> py.test --cov-report html --cov MongographQL --verbose
+```
