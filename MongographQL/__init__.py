@@ -1,5 +1,5 @@
 from six import with_metaclass
-from mongoengine import StringField, ReferenceField
+from mongoengine import StringField, ReferenceField, Document
 import graphene
 
 from .custom_fields import RESPECTIVE_FIELDS, RESPECTIVE_SPECIAL_FIELDS, GenericField, CustomDecimalField, \
@@ -14,6 +14,7 @@ class MongraphSchemaMeta(type):
             return type.__new__(cls, class_name, parents, attrs)
 
         MODEL = attrs.get('__MODEL__')
+        cls.verify(class_name, attrs)
 
         model_attrs = {k: v for k, v in MODEL._fields.items()}   # key: fields name, value: type of mongoField
         attrs['fields'] = {}                                     # Fields that appear in paramters (with operators)
@@ -25,6 +26,8 @@ class MongraphSchemaMeta(type):
 
         setattr(graphene_object_class, 'auto_resolver', classmethod(cls.auto_resolver))
         setattr(graphene_object_class, 'auto_resolver_list', classmethod(cls.auto_resolver_list))
+
+        cls._generated_schemas[MODEL] = graphene_object_class
 
         return graphene_object_class
 
@@ -80,6 +83,18 @@ class MongraphSchemaMeta(type):
                 result[f_name + '__' + op_name] = graphene.List(graphene.String)
 
         return result
+
+    @classmethod
+    def verify(cls, class_name, attrs):
+        MODEL = attrs.get('__MODEL__')
+
+        if not MODEL:
+            raise AttributeError('Failed to generate schema {} '
+                                 ', __MODEL__ attribute was not given.'.format(class_name))
+
+        if not issubclass(MODEL, Document):
+            raise TypeError('Failed to generate schema {} '
+                            ', __MODEL__ must be a subclass of mongoengine.Document.'.format(class_name))
 
 
 class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
