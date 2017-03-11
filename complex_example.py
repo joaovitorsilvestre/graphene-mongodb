@@ -47,7 +47,7 @@ class User(Document):
     super_id = LongField()
     remember_pi = DecimalField(min_value=3.1, max_value=3.15, precision=11)
     ordered_favorite_colors = SortedListField(StringField())
-    nickname= BinaryField()
+    nickname = BinaryField()
 
 
 user = User(username="John",
