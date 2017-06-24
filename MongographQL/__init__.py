@@ -108,4 +108,5 @@ class MongraphSchemaMeta(type):
 
 
 class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
-    pass
+    def __new__(self, model):
+        return type(model.__name__, (MongraphSchema,), {'__MODEL__': model})

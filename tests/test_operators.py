@@ -1,233 +1,168 @@
-from tests.utils import MongographQLTestCase
-from mongoengine import *
-
 from MongographQL import MongraphSchema
-import graphene
 
 
-class OperatorsTest(MongographQLTestCase):
-    def test_in(self):
-        """ Tests the operator's 'in' and 'nin' """
-
-        class Person(Document):
-            name = StringField()
-
-        class PersonSchema(MongraphSchema):
-            __MODEL__ = Person
-
-        Person(name="John").save()
-
-        Query = self.QueryBuilder([PersonSchema])
-        schema = graphene.Schema(query=Query)
-
-        # operator in
-        result = schema.execute(""" query testQuery {
-           person(name_In: ["Travolta"]) {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
-
-        result = schema.execute(""" query testQuery {
-           person(name_In: ["John"]) {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
-
-        # operator nin
-        result = schema.execute(""" query testQuery {
-           person(name_Nin: ["John"]) {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
-
-        result = schema.execute(""" query testQuery {
-           person(name_Nin: ["Travolta"]) {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+query = lambda operators: """ query testQuery {
+        person(%s) {
+            id
+            name            
+            active 
+            age 
+            score 
+            birthday 
+            siteUrl 
+            bookInfo 
+            email 
+            superId 
+            rememberPi 
+            nickname 
+            location
+            favouriteColors 
+            posts {
+                id
+                text
+            }
+            bestPost {
+                id
+                text
+            } 
+        }
+    }""" % operators
 
 
-class StringOperatorsTest(MongographQLTestCase):
-    def test_exact(self):
-        """ Tests the operator's 'exact' and 'iexact' """
+def test_no_operator(schema_builder, mock_person_filled):
+    """ without operator we consider that is a string with an id """
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        class Person(Document):
-            name = StringField()
+    schema = schema_builder([PersonSchema])
+    result = schema.execute(query('id:"' + str(p.id) + '"'))
 
-        class PersonSchema(MongraphSchema):
-            __MODEL__ = Person
+    assert result.data['person']['id'] == str(p.id)
 
-        Person(name="John").save()
 
-        Query = self.QueryBuilder([PersonSchema])
-        schema = graphene.Schema(query=Query)
+def test_in(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        # operator 'exact', case sensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Exact: "john") {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
+    schema = schema_builder([PersonSchema])
+    result = schema.execute(query('id_In:["' + str(p.id) + '"]'))
 
-        result = schema.execute(""" query testQuery {
-           person(name_Exact: "John") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+    assert result.data['person']['id'] == str(p.id)
 
-        # operator 'iexact', case insensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Iexact: "travolta") {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
 
-        result = schema.execute(""" query testQuery {
-           person(name_Iexact: "John") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+def test_nin(schema_builder, mock_person_filled, mock_person):
+    p1 = mock_person_filled()
+    p2 = mock_person()
+    p1.save()
+    p2.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        result = schema.execute(""" query testQuery {
-           person(name_Iexact: "john") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+    schema = schema_builder([PersonSchema])
+    result = schema.execute(query('id_Nin:["' + str(p1.id) + '"]'))
 
-    def test_contains(self):
-        """ Tests the operator's 'contains' and 'icontains' """
-        class Person(Document):
-            name = StringField()
+    assert result.data['person']['id'] != str(p1.id)
+    assert result.data['person']['id'] == str(p2.id)
 
-        class PersonSchema(MongraphSchema):
-            __MODEL__ = Person
 
-        Person(name="John").save()
+def test_exact(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        Query = self.QueryBuilder([PersonSchema])
-        schema = graphene.Schema(query=Query)
+    schema = schema_builder([PersonSchema])
 
-        # operator 'contains', case sensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Contains: "john") {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
+    result = schema.execute(query('name_Exact:"' + p.name + '"'))
+    assert result.data['person']['name'] == p.name
 
-        result = schema.execute(""" query testQuery {
-           person(name_Contains: "John") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+    result = schema.execute(query('name_Exact:"' + p.name.upper() + '"'))
+    assert result.data['person'] is None
 
-        # operator 'icontains', case insensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Icontains: "john") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
 
-        result = schema.execute(""" query testQuery {
-           person(name_Icontains: "John") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+def test_iexact(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-    def test_startswith(self):
-        """ Tests the operator's 'startswith' and 'istartswith' """
-        class Person(Document):
-            name = StringField()
+    schema = schema_builder([PersonSchema])
 
-        class PersonSchema(MongraphSchema):
-            __MODEL__ = Person
+    result = schema.execute(query('name_Iexact:"' + p.name.lower() + '"'))
+    assert result.data['person']['name'] == p.name
 
-        Person(name="John").save()
+    result = schema.execute(query('name_Iexact:"' + p.name.upper() + '"'))
+    assert result.data['person']['name'] == p.name
 
-        Query = self.QueryBuilder([PersonSchema])
-        schema = graphene.Schema(query=Query)
 
-        # operator 'startswith', case sensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Startswith: "j") {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
+def test_contains(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        result = schema.execute(""" query testQuery {
-           person(name_Startswith: "J") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+    schema = schema_builder([PersonSchema])
 
-        # operator 'istartswith', case insensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Istartswith: "j") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+    result = schema.execute(query('name_Contains:"' + p.name[2:6] + '"'))
+    assert result.data['person']['name'] == p.name
 
-        result = schema.execute(""" query testQuery {
-           person(name_Istartswith: "J") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'John'}}
+    result = schema.execute(query('name_Contains:"' + p.name[2:6].upper() + '"'))
+    assert result.data['person'] is None
 
-    def test_endswith(self):
-        """ Tests the operator's 'endswith' and 'iendswith' """
-        class Person(Document):
-            name = StringField()
 
-        class PersonSchema(MongraphSchema):
-            __MODEL__ = Person
+def test_icontains(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        Person(name="JOHN").save()
+    schema = schema_builder([PersonSchema])
 
-        Query = self.QueryBuilder([PersonSchema])
-        schema = graphene.Schema(query=Query)
+    result = schema.execute(query('name_Icontains:"' + p.name[2:6].lower() + '"'))
+    assert result.data['person']['name'] == p.name
 
-        # operator 'endswith', case sensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Endswith: "n") {
-               name
-           }
-        }""")
-        assert result.data == {'person': None}
+    result = schema.execute(query('name_Icontains:"' + p.name[2:6].upper() + '"'))
+    assert result.data['person']['name'] == p.name
 
-        result = schema.execute(""" query testQuery {
-           person(name_Endswith: "N") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'JOHN'}}
 
-        # operator 'iendswith', case insensitive
-        result = schema.execute(""" query testQuery {
-           person(name_Iendswith: "n") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'JOHN'}}
+def test_startswith(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
 
-        result = schema.execute(""" query testQuery {
-           person(name_Iendswith: "N") {
-               name
-           }
-        }""")
-        assert result.data == {'person': {'name': 'JOHN'}}
+    schema = schema_builder([PersonSchema])
+
+    result = schema.execute(query('name_Startswith:"' + p.name[0] + '"'))
+    assert result.data['person']['name'] == p.name
+
+
+def test_istartswith(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
+
+    schema = schema_builder([PersonSchema])
+
+    result = schema.execute(query('name_Istartswith:"' + p.name[0].upper() + '"'))
+    assert result.data['person']['name'] == p.name
+
+
+def test_endswith(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
+
+    schema = schema_builder([PersonSchema])
+
+    result = schema.execute(query('name_Endswith:"' + p.name[-1] + '"'))
+    assert result.data['person']['name'] == p.name
+
+
+
+def test_iendswith(schema_builder, mock_person_filled):
+    p = mock_person_filled()
+    p.save()
+    PersonSchema = MongraphSchema(mock_person_filled)
+
+    schema = schema_builder([PersonSchema])
+
+    result = schema.execute(query('name_Iendswith:"' + p.name[-1].upper() + '"'))
+    assert result.data['person']['name'] == p.name
+
