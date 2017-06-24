@@ -39,8 +39,8 @@ class UserSchema(MongraphSchema):
     __MODEL__ = User
     
 class Query(graphene.ObjectType):
-	user = UserSchema.single()  # return the first that matchs the query
-	users = UserSchema.list()   # return a list of the objects that matchs the query
+    user = UserSchema.single()  # return the first that matchs the query
+    users = UserSchema.list()   # return a list of the objects that matchs the query
 ```
 <br>
 
@@ -79,8 +79,7 @@ class Query(graphene.ObjectType):
 * startswith
 * istartswith
 * endswith
-* iendswith 
-* match
+* iendswith
 
 ### Run tests
 ``` bash
