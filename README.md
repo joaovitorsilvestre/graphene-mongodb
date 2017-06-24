@@ -39,14 +39,15 @@ class UserSchema(MongraphSchema):
     __MODEL__ = User
     
 class Query(graphene.ObjectType):
-	user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.auto_resolver)
+	user = UserSchema.single()  # return the first that matchs the query
+	users = UserSchema.list()   # return a list of the objects that matchs the query
 ```
 <br>
 
 ### Examples
-<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" >Simple example</a>
+<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" target="_blank">Simple example</a>
 <br>
-<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complexExample.py" >Complex example</a>
+<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complex_example.py" target="_blank">Complex example</a>
 
 ### Suported Fields
 * IntField
@@ -65,6 +66,21 @@ class Query(graphene.ObjectType):
 * DecimalField
 * BinaryField
 * SortedListField
+
+### Suported Operators
+* in
+* nin
+* gte
+* lte
+* exact
+* iexact
+* contains
+* icontains
+* startswith
+* istartswith
+* endswith
+* iendswith 
+* match
 
 ### Run tests
 ``` bash
