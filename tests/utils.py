@@ -15,7 +15,6 @@ class MongographQLTestCase(unittest.TestCase):
         self._connection.drop_database(MONGO_TEST_DB)
 
     def QueryBuilder(self, fields):
-        attrs = {schema.__name__.replace('Schema', '').lower(): graphene.Field(schema, **schema.fields, resolver=schema.auto_resolver)
-                 for schema in fields}
+        attrs = {schema.__name__.replace('Schema', '').lower(): schema.single() for schema in fields}
 
         return type('Query', (graphene.ObjectType,), attrs)

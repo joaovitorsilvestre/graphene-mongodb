@@ -384,7 +384,7 @@ class FieldsTest(MongographQLTestCase):
             __MODEL__ = User
 
         class Query(graphene.ObjectType):
-            users = graphene.List(UserSchema, UserSchema.fields, UserSchema.auto_resolver_list)
+            users = UserSchema.list()
 
         schema = graphene.Schema(query=Query)
 

@@ -16,48 +16,57 @@ class MongraphSchemaMeta(type):
         MODEL = attrs.get('__MODEL__')
         cls.verify(class_name, attrs)
 
-        model_attrs = {k: v for k, v in MODEL._fields.items()}   # key: fields name, value: type of mongoField
-        attrs['fields'] = {}                                     # Fields that appear in paramters (with operators)
+        model_attrs = {k: v for k, v in MODEL._fields.items()}  # key: fields name, value: type of mongoField
 
-        attrs = cls.convert_fields(attrs, model_attrs)  # all fields converted to respective graphene
+        attrs.update(cls.convert_fields(model_attrs))           # Fields that appear in paramters (with operators)
+        attrs['single'] = classmethod(cls.single)
+        attrs['list'] = classmethod(cls.list)
 
-        # generate the graphene class
+        # here we generate the graphene class and memoize it
         graphene_object_class = type(class_name, (graphene.ObjectType,), attrs)
-
-        setattr(graphene_object_class, 'auto_resolver', classmethod(cls.auto_resolver))
-        setattr(graphene_object_class, 'auto_resolver_list', classmethod(cls.auto_resolver_list))
-
         cls._generated_schemas[MODEL] = graphene_object_class
 
         return graphene_object_class
 
-    # Store schemas of Documents already generated (Memoization)
-    _generated_schemas = {}
+    _generated_schemas = {}  # Store schemas of Documents already generated (Memoization)
 
+    # http://docs.mongoengine.org/guide/querying.html#query-operators
     _OPERATORS = {
         'in': lambda field: graphene.List(type(field)),
         'nin': lambda field: graphene.List(type(field)),
+        'gte': lambda field: graphene.String(),
+        'lte': lambda field: graphene.String(),
     }
 
+    # http://docs.mongoengine.org/guide/querying.html#string-queries
     _STRING_OPERATORS = ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith',
                         'endswith', 'iendswith', 'match']
 
-    def auto_resolver(self, root, args, contex, info):
-        """ this function will be passed to generated subclass """
-        return generic_resolver(self, args, info)
+    def single(self):
+        """ auto generate the graphene field """
 
-    def auto_resolver_list(self, root, args, context, info):
-        """ this function will be passed to generated subclass """
-        return generic_resolver(self, args, info, is_list=True)
+        def auto_resolver(root, args, contex, info):
+            return generic_resolver(self, args, info)
+
+        return graphene.Field(self, **self.fields, resolver=auto_resolver)
+
+    def list(self):
+        """ auto generate the graphene List """
+        def auto_resolver_list(root, args, context, info):
+            return generic_resolver(self, args, info, is_list=True)
+
+        return graphene.List(self, **self.fields, resolver=auto_resolver_list)
 
     @classmethod
-    def convert_fields(cls, schema_attrs, model_attrs):
+    def convert_fields(cls, model_attrs):
+        result = {'fields': {}}
+
         for f_name, mongo_field in model_attrs.items():
             field = cls.to_respective(f_name, mongo_field)
-            schema_attrs[f_name] = field
-            schema_attrs['fields'].update(cls.add_operators(f_name, mongo_field, field))
+            result[f_name] = field
+            result['fields'].update(cls.add_operators(f_name, mongo_field, field))
 
-        return schema_attrs
+        return result
 
     @classmethod
     def to_respective(cls, f_name, mongo_field):
@@ -79,6 +88,7 @@ class MongraphSchemaMeta(type):
                 for op in cls._STRING_OPERATORS:
                     result[f_name + '__' + op] = graphene.String()
         elif isinstance(mongo_field, ReferenceField):
+            result[f_name] = graphene.String()
             for op_name in cls._OPERATORS:
                 result[f_name + '__' + op_name] = graphene.List(graphene.String)
 

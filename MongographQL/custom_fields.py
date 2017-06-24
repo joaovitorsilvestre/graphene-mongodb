@@ -53,7 +53,11 @@ class SpecialFields:
         if list_items_type in RESPECTIVE_FIELDS:
             return graphene.List(type(RESPECTIVE_FIELDS[list_items_type]()))
         else:
-            document = mongo_field.field.document_type
+            try:
+                document = mongo_field.field.document_type
+            except AttributeError:
+                raise AttributeError('Error in {} field, have sure that this is defined with a mongoengine field'
+                                     .format(f_name))
 
             schema = generate_schema(document, f_name)
             return graphene.List(schema)

@@ -21,17 +21,14 @@ user = User(username="John",
             score=5.5)
 user.save()
 
+
 class UserSchema(MongraphSchema):
     __MODEL__ = User
 
-class Query(graphene.ObjectType):
-    user = graphene.Field(UserSchema, **UserSchema.fields, resolver=UserSchema.auto_resolver)
 
-    # # auto_resolver doesnt work in python 2.7, the follows code do the same job
-    # user = graphene.Field(UserSchema, **UserSchema.fields)
-    # def resolve_user(self, args, context, info):
-    #     from MongographQL.utils import Resolvers
-    #     return Resolvers.generic_resolver(UserSchema, args, info)
+class Query(graphene.ObjectType):
+    user = UserSchema.single()
+    users = UserSchema.list()
 
 schema = graphene.Schema(query=Query)
 
