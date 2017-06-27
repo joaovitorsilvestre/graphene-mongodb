@@ -39,8 +39,11 @@ class MongraphSchemaMeta(type):
     }
 
     # http://docs.mongoengine.org/guide/querying.html#string-queries
-    _STRING_OPERATORS = ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith',
-                        'endswith', 'iendswith', 'match']
+    _STRING_OPERATORS = ['exact', 'iexact', 'contains', 'icontains', 'startswith',
+                         'istartswith', 'endswith', 'iendswith']
+
+    ## Options that we can pass as operators to define the query
+    _SPECIAL_PARAMETERS = ['skip', 'limit']
 
     def single(self):
         """ auto generate the graphene field """
@@ -65,6 +68,9 @@ class MongraphSchemaMeta(type):
             field = cls.to_respective(f_name, mongo_field)
             result[f_name] = field
             result['fields'].update(cls.add_operators(f_name, mongo_field, field))
+
+        for p in cls._SPECIAL_PARAMETERS:
+            result['fields'].update({p: graphene.Int()})
 
         return result
 

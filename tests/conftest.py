@@ -16,7 +16,7 @@ def mongo():
 @pytest.fixture(scope='function')
 def schema_builder():
     def build(schemas):
-        attrs = {schema.__name__.replace('Schema', '').lower(): schema.single() for schema in schemas}
+        attrs = {schema[0].__name__.lower(): schema[1]() for schema in schemas}
         Query = type('Query', (graphene.ObjectType,), attrs)
         return graphene.Schema(query=Query)
     return build

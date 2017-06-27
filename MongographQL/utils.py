@@ -9,11 +9,19 @@ def generic_resolver(graphene_object, args, info, is_list=False):
 
     fields = [k for k, v in get_fields(info).items() if k != '__MODEL__']
     fields = [to_snake_case(f) for f in fields]
+    query = {k: v for k, v in args.items() if k not in ['skip', 'limit']}
 
     if is_list:
-        result = mongo_doc.objects(**args).only(*fields)
+        result = mongo_doc.objects(**query).only(*fields)
+
+        ## update the query if there's options in args
+        if 'skip' in args:
+            result = result.skip(args['skip'])
+            
+        if 'limit' in args:
+            result = result.limit(args['limit'])
     else:
-        result = mongo_doc.objects(**args).only(*fields).first()
+        result = mongo_doc.objects(**query).only(*fields).first()
 
     if result and is_list:
         def get_document_attrs(doc):

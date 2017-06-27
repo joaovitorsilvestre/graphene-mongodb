@@ -6,7 +6,7 @@ def test_string_field(schema_builder, mock_person):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
        person {
            name
@@ -21,7 +21,7 @@ def test_boolean_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
        person {
            active
@@ -36,7 +36,7 @@ def test_int_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
        person {
            age
@@ -51,7 +51,7 @@ def test_float_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
        person {
            score
@@ -70,7 +70,7 @@ def test_datetime_field(mock_person, schema_builder):
     PersonSchema = MongraphSchema(mock_person)
 
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
          person {
              birthday
@@ -86,7 +86,7 @@ def test_id_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
        person {
            id
@@ -103,7 +103,7 @@ def test_url_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             siteUrl
@@ -125,7 +125,7 @@ def test_dict_field(mock_person, schema_builder):
 
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             bookInfo
@@ -141,7 +141,7 @@ def test_email_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             email
@@ -157,7 +157,7 @@ def test_long_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             superId
@@ -173,7 +173,7 @@ def test_decimal_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             rememberPi
@@ -183,12 +183,12 @@ def test_decimal_field(mock_person, schema_builder):
     assert result.data == {'person': {'rememberPi': float(p.remember_pi)}}
 
 
-def test_binaty_field(mock_person, schema_builder):
+def test_binary_field(mock_person, schema_builder):
     p = mock_person(nickname=b"John armless")
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             nickname
@@ -203,7 +203,7 @@ def test_point_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             location
@@ -223,7 +223,7 @@ def test_list_field(mock_person, schema_builder):
     p.save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             favouriteColors
@@ -242,7 +242,7 @@ def test_list_reference_field(mock_person, mock_post, schema_builder):
     mock_person(posts=[post1, post2]).save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             posts {
@@ -266,7 +266,7 @@ def test_reference_field(mock_person, mock_post, schema_builder):
     mock_person(best_post=post).save()
     PersonSchema = MongraphSchema(mock_person)
 
-    schema = schema_builder([PersonSchema])
+    schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
         person {
             bestPost {
