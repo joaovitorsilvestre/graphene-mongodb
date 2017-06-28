@@ -21,7 +21,7 @@ class UserSchema(graphene.ObjectType):
     favorite_colors = graphene.List(graphene.String)
     
 class Query(graphene.ObjectType):
-	user = graphene.Field(UserSchema, name=graphene.String(),
+    user = graphene.Field(UserSchema, name=graphene.String(),
                                       age=graphene.Int(),
                                       favorite_colors=graphene.List(graphene.String))
     
@@ -49,37 +49,40 @@ class Query(graphene.ObjectType):
 <br>
 <a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complex_example.py" target="_blank">Complex example</a>
 
+### Try it
+```bash
+cd ~/ && git clone https://github.com/joaovitorsilvestre/MongographQL.git && cd ~/MongographQL
+mkvirtualenv MongographQL -p `which python3`
+pip install -r requirements.txt && pip install -r dev-requirements.txt
+export FLASK_APP=~/MongographQL/flask_example/__init__.py
+flask run
+```
+
+Now is running on http://127.0.0.1:5000/graphql, try with this query:
+```
+query data {
+  user {
+  	username
+    id
+    bank {
+      name
+    }
+  }
+  posts {
+    title
+  }
+}
+```
+
+
 ### Suported Fields
-* IntField
-* FloatField
-* StringField
-* BooleanField
-* ReferenceField
-* DateTimeField
-* ListField 
-* ObjectId
-* URLField
-* PointField
-* DictField
-* EmailField
-* LongField
-* DecimalField
-* BinaryField
-* SortedListField
+IntField, FloatField, StringField, BooleanField, ReferenceField, DateTimeField, ListField, ObjectId
+URLField, PointField, DictField, EmailField, LongField, DecimalField, BinaryField, SortedListField
+
 
 ### Suported Operators
-* in
-* nin
-* gte
-* lte
-* exact
-* iexact
-* contains
-* icontains
-* startswith
-* istartswith
-* endswith
-* iendswith
+in, nin, gte, lte, exact, iexact, contains, icontains, startswith, istartswith, endswith, iendswith
+
 
 ### Run tests
 ``` bash

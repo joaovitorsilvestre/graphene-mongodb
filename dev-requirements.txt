@@ -12,3 +12,6 @@ pyparsing==2.1.10
 pytest==3.0.6
 six==1.10.0
 typing==3.5.3.0
+Flask==0.12.2
+Flask-GraphQL==1.4.1
+
