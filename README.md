@@ -72,7 +72,7 @@ query data {
 ### Suported Fields
 IntField, FloatField, StringField, BooleanField, ReferenceField, DateTimeField, LongField, ListField, ObjectId,        URLField, PointField, DictField, EmailField, DecimalField, BinaryField, SortedListField
 
-## You can also use operators in query:
+### You can also use operators in query:
 ```
 query data {
   user(username_Contains:"Joh") {
@@ -88,12 +88,12 @@ query data {
 in, nin, gte, lte, exact, iexact, contains, icontains, startswith, istartswith, endswith, iendswith
 
 
-### Code examples
+### Another examples
 <a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" target="_blank">Simple example</a>
 <br>
 <a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complex_example.py" target="_blank">Complex example</a>
 
-### Run tests
+## Run tests
 ``` bash
 > py.test --cov MongographQL --verbose
 > py.test --cov-report html --cov MongographQL --verbose
