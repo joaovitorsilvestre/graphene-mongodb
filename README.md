@@ -44,12 +44,7 @@ class Query(graphene.ObjectType):
 ```
 <br>
 
-### Examples
-<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" target="_blank">Simple example</a>
-<br>
-<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complex_example.py" target="_blank">Complex example</a>
-
-### Try it
+## Flask example
 ```bash
 cd ~/ && git clone https://github.com/joaovitorsilvestre/MongographQL.git && cd ~/MongographQL
 mkvirtualenv MongographQL -p `which python3`
@@ -58,7 +53,7 @@ export FLASK_APP=~/MongographQL/flask_example/__init__.py
 flask run
 ```
 
-Now is running on http://127.0.0.1:5000/graphql, try with this query:
+Now is running on <a hfef="http://127.0.0.1:5000/graphql" target="_blank">http://127.0.0.1:5000/graphql</a>, try with this <a href="http://127.0.0.1:5000/graphql?query=query%20data%20%7B%0A%20%20user%20%7B%0A%20%20%09username%0A%20%20%20%20id%0A%20%20%20%20bank%20%7B%0A%20%20%20%20%20%20name%0A%20%20%20%20%7D%0A%20%20%7D%0A%20%20posts%20%7B%0A%20%20%20%20title%0A%20%20%7D%0A%7D&operationName=data" target="_blank">query</a>:
 ```
 query data {
   user {
@@ -74,15 +69,29 @@ query data {
 }
 ```
 
-
 ### Suported Fields
-IntField, FloatField, StringField, BooleanField, ReferenceField, DateTimeField, ListField, ObjectId
-URLField, PointField, DictField, EmailField, LongField, DecimalField, BinaryField, SortedListField
+IntField, FloatField, StringField, BooleanField, ReferenceField, DateTimeField, LongField, ListField, ObjectId,        URLField, PointField, DictField, EmailField, DecimalField, BinaryField, SortedListField
 
+## You can also use operators in query:
+```
+query data {
+  user(username_Contains:"Joh") {
+  	username
+  }
+  posts(title_In:["Post1", "Post2"]) {
+    title
+  }
+}
+```
 
 ### Suported Operators
 in, nin, gte, lte, exact, iexact, contains, icontains, startswith, istartswith, endswith, iendswith
 
+
+### Code examples
+<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" target="_blank">Simple example</a>
+<br>
+<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complex_example.py" target="_blank">Complex example</a>
 
 ### Run tests
 ``` bash
