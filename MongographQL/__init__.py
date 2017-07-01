@@ -13,10 +13,10 @@ class MongraphSchemaMeta(type):
         if not parents:
             return type.__new__(cls, class_name, parents, attrs)
 
-        MODEL = attrs.get('__MODEL__')
+        model = attrs.get('model')
         cls.verify(class_name, attrs)
 
-        model_attrs = {k: v for k, v in MODEL._fields.items()}  # key: fields name, value: type of mongoField
+        model_attrs = {k: v for k, v in model._fields.items()}  # key: fields name, value: type of mongoField
 
         attrs.update(cls.convert_fields(model_attrs))           # Fields that appear in paramters (with operators)
         attrs['single'] = classmethod(cls.single)
@@ -24,7 +24,7 @@ class MongraphSchemaMeta(type):
 
         # here we generate the graphene class and memoize it
         graphene_object_class = type(class_name, (graphene.ObjectType,), attrs)
-        cls._generated_schemas[MODEL] = graphene_object_class
+        cls._generated_schemas[model] = graphene_object_class
 
         return graphene_object_class
 
@@ -109,17 +109,17 @@ class MongraphSchemaMeta(type):
 
     @classmethod
     def verify(cls, class_name, attrs):
-        MODEL = attrs.get('__MODEL__')
+        model = attrs.get('model')
 
-        if not MODEL:
+        if not model:
             raise AttributeError('Failed to generate schema {} '
-                                 ', __MODEL__ attribute was not given.'.format(class_name))
+                                 ', model attribute was not given.'.format(class_name))
 
-        if not issubclass(MODEL, Document):
+        if not issubclass(model, Document):
             raise TypeError('Failed to generate schema {} '
-                            ', __MODEL__ must be a subclass of mongoengine.Document.'.format(class_name))
+                            ', model must be a subclass of mongoengine.Document.'.format(class_name))
 
 
 class MongraphSchema(with_metaclass(MongraphSchemaMeta)):
     def __new__(self, model):
-        return type(model.__name__, (MongraphSchema,), {'__MODEL__': model})
+        return type(model.__name__, (MongraphSchema,), {'model': model})

@@ -23,7 +23,7 @@ user.save()
 
 
 class UserSchema(MongraphSchema):
-    __MODEL__ = User
+    model = User
 
 
 class Query(graphene.ObjectType):

@@ -20,9 +20,9 @@ def parse_operators(args):
 def generic_resolver(graphene_object, args, info, is_list=False):
     ''' An generic resolver to auto handle query's and return graphene objects with the data '''
 
-    mongo_doc = graphene_object.__MODEL__
+    mongo_doc = graphene_object.model
 
-    fields = [k for k, v in get_fields(info).items() if k != '__MODEL__']
+    fields = get_fields(info)
     fields = [to_snake_case(f) for f in fields]
     query = parse_operators(args)
 
@@ -60,7 +60,7 @@ def generate_schema(document, f_name):
         ''' Generate schema and memoize it '''
 
         schema = type(f_name, (MongraphSchema,), {
-            '__MODEL__': document
+            'model': document
         })
         MongraphSchema._generated_schemas.update({
             document: schema

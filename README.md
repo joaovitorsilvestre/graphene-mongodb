@@ -36,7 +36,7 @@ The proposal of MongographQL is to make it cleaner and do all the work of query'
 
 ```python
 class UserSchema(MongraphSchema):
-    __MODEL__ = User
+    model = User
     
 class Query(graphene.ObjectType):
     user = UserSchema.single()  # return the first that matchs the query

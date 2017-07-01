@@ -6,15 +6,15 @@ from .models import User, Bank, Post
 
 
 class PostSchema(MongraphSchema):
-    __MODEL__ = Post
+    model = Post
 
 
 class BankSchema(MongraphSchema):
-    __MODEL__ = Bank
+    model = Bank
 
 
 class UserSchema(MongraphSchema):
-    __MODEL__ = User
+    model = User
 
 
 class Query(graphene.ObjectType):

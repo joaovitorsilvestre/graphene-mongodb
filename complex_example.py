@@ -75,19 +75,19 @@ user.save()
 
 
 class PostsSchema(MongraphSchema):
-    __MODEL__ = Posts
+    model = Posts
 
 
 class CountrySchema(MongraphSchema):
-    __MODEL__ = Country
+    model = Country
 
 
 class BankSchema(MongraphSchema):
-    __MODEL__ = Bank
+    model = Bank
 
 
 class UserSchema(MongraphSchema):
-    __MODEL__ = User
+    model = User
 
 
 class Query(graphene.ObjectType):
