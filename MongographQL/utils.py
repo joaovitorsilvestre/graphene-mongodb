@@ -1,5 +1,20 @@
+import iso8601
 from graphql.utils.ast_to_dict import ast_to_dict
 from graphene.utils.str_converters import to_snake_case
+
+
+def parse_operators(args):
+    args = {k: v for k, v in args.items() if k not in ['skip', 'limit']}
+    for k, v in args.items():
+        try:
+            is_data = iso8601.parse_date(v)
+        except:
+            is_data = False
+
+        if is_data:
+            args[k] = is_data if is_data else v
+
+    return args
 
 
 def generic_resolver(graphene_object, args, info, is_list=False):
@@ -9,7 +24,7 @@ def generic_resolver(graphene_object, args, info, is_list=False):
 
     fields = [k for k, v in get_fields(info).items() if k != '__MODEL__']
     fields = [to_snake_case(f) for f in fields]
-    query = {k: v for k, v in args.items() if k not in ['skip', 'limit']}
+    query = parse_operators(args)
 
     if is_list:
         result = mongo_doc.objects(**query).only(*fields)

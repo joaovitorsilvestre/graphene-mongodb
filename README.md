@@ -85,7 +85,7 @@ query data {
 ```
 
 ### Suported Operators
-in, nin, gte, lte, exact, iexact, contains, icontains, startswith, istartswith, endswith, iendswith
+in, nin, lt, lte, gt, gte, exists, size, all, exact, iexact, contains, icontains, startswith, istartswith, endswith, iendswith
 
 
 ### Another examples

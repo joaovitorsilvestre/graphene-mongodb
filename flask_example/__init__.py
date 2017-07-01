@@ -5,7 +5,7 @@ from .schema import schema, save_tests_in_db
 
 connect('MongraphQL')
 
-save_tests_in_db()
+# save_tests_in_db()
 
 app = Flask(__name__)
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))

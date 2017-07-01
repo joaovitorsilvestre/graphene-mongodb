@@ -1,5 +1,5 @@
 from six import with_metaclass
-from mongoengine import StringField, ReferenceField, Document
+from mongoengine import StringField, ReferenceField, Document, ListField, SortedListField
 import graphene
 
 from .custom_fields import RESPECTIVE_FIELDS, RESPECTIVE_SPECIAL_FIELDS, GenericField, CustomDecimalField, \
@@ -32,10 +32,15 @@ class MongraphSchemaMeta(type):
 
     # http://docs.mongoengine.org/guide/querying.html#query-operators
     _OPERATORS = {
+        'ne': lambda field: graphene.String(),
+        'lt': lambda field: graphene.String(),
+        'lte': lambda field: graphene.String(),
+        'gt': lambda field: graphene.String(),
+        'gte': lambda field: graphene.String(),
         'in': lambda field: graphene.List(type(field)),
         'nin': lambda field: graphene.List(type(field)),
-        'gte': lambda field: graphene.String(),
-        'lte': lambda field: graphene.String(),
+        'all': lambda field: graphene.List(type(field)),
+        'exists': lambda field: graphene.Boolean()
     }
 
     # http://docs.mongoengine.org/guide/querying.html#string-queries
@@ -97,6 +102,8 @@ class MongraphSchemaMeta(type):
             result[f_name] = graphene.String()
             for op_name in cls._OPERATORS:
                 result[f_name + '__' + op_name] = graphene.List(graphene.String)
+        elif isinstance(mongo_field, ListField) or isinstance(mongo_field, SortedListField):
+            result[f_name + '__size'] = graphene.Int()
 
         return result
 
