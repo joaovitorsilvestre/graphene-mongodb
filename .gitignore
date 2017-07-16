@@ -2,3 +2,6 @@
 htmlcov
 .coverage
 shell.py
+.idea
+./__pycache__
+*/__pycache__
