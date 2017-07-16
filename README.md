@@ -10,11 +10,12 @@ Given that mongoengine Document:
 class User(Document):
     username = StringField()
     creation_date = DateTimeField()
-    favourite_color = ListField()
+    favourite_color = ListField(StringField())
 ```
 To generage a graphene schema for that Document we create a class that is subclass of graphene_mongo.MongoSchema, or we can also just call it passing the model as first argument:
 ```python
 from graphene_mongo import MongoSchema
+
 class UserSchema(MongoSchema):
     model = User
 # OR
@@ -22,8 +23,11 @@ UserSchema = MongoSchema(User)
 ```
 The schema now it's generated. Now it's necessary to create a graphene object Query:
 ```python
+import graphene
+
 class Query(graphene.ObjectType):
     user = UserSchema.single
+    
 schema = graphene.Schema(query=Query)
 
 # now we can do the query:
@@ -36,14 +40,14 @@ query Data {
 }""")
 ```
 
-You may notice the UserSchema.single atribute in the example above, the class UserSchema has many other atrributes. We explain they all below:
+You may notice the UserSchema.single atribute in the example above, the class UserSchema has many other atrributes. All they are explained below:
 
 | Atribute  | Description |
 | ------------- | ------------- |
 |  single  |  We use single we want that the query result be a unique result. That's the same that make the query in mongoengine calling .first() to get the first object that matchs the query.  |
 | list  | List is used when we want a list of the documents that matchs the query. |
 | model  | That's easy, this attribute stores the original Document of mongoengine that you created. |
-| fields |  This field is more consult, you can use the fields that was converted from mongoengine to graphene. For instance, in our UserSchema class the attribute field will be adict like this: {'username': graphene.String}|
+| fields |  This field is more consult, you can use the fields that was converted from mongoengine to graphene. For instance, in our UserSchema class the attribute field will be a dict like this: {'username': graphene.String}|
 | mutation | Mutate is the atribute that we use when creating Mutations with graphene. See more in [Mutations](#mutations) |
 
 <br>
@@ -51,7 +55,7 @@ You may notice the UserSchema.single atribute in the example above, the class Us
 ## Mutations
 
 Somethimes we need to save new data in the mongodb instead of doing querys. Mutation that do that job.
-We will use the <b>UserSchema</b> that we create in the examples. As before we created a graphene object called Query to handle the query, we now need to do the same to Mutation:
+Lets use again the <b>UserSchema</b> that we created in the examples. As before we created a graphene object called Query to handle the query, we now need to do the same to Mutation:
 
 ```python
 class Mutation(graphene.ObjectType):
@@ -115,6 +119,7 @@ The best is that they are all supported by graphene-mongo.
 <br>
 <hr>
 <br>
+
 
 ### TODOs
 * Accept user mutation return None;
