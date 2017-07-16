@@ -1,4 +1,5 @@
 import pytest
+
 from datetime import datetime
 from mongoengine import *
 
@@ -9,6 +10,7 @@ def mock_post(mongo):
         text = StringField()
 
     yield Post
+
 
 @pytest.fixture(scope="function")
 def mock_person(mongo, mock_post):
@@ -32,6 +34,7 @@ def mock_person(mongo, mock_post):
         best_post = ReferenceField(mock_post, default=None)
 
     yield Person
+
 
 @pytest.fixture(scope="function")
 def mock_person_filled(mongo, mock_post):

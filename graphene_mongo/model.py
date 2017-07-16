@@ -1,0 +1,44 @@
+import graphene
+
+from graphene_mongo.fields import convert_fields
+from graphene_mongo.query import resolver_query
+from graphene_mongo.mutation import gen_mutation
+
+
+class ModelSchema:
+    def __init__(self, model, mutate, attrs_mongo_doc):
+        self.model = model
+        self.mutate_func = mutate  # mutate function that user specified
+
+        self.fields, self.fields_mutation, self.operators_mutation,\
+            self.operators_single, self.operators_list = convert_fields(attrs_mongo_doc)
+
+        self.schema = type(self.model.__name__ + 'Graphene', (graphene.ObjectType,), self.fields.copy())
+
+    def to_attrs(self):
+        return {
+            'single': self.single(),
+            'list': self.list(),
+            'fields': self.fields,
+            'model': self.model,
+            'mutate': self.mutate().Field()
+        }
+
+    def mutate(self):
+        return gen_mutation(self.model, self.schema, self.operators_mutation, self.fields_mutation, self.mutate_func)
+
+    def single(self):
+        return ModelSchema.resolver(self.schema, self.model, operators_single=self.operators_single)
+
+    def list(self):
+        return ModelSchema.resolver(self.schema, self.model, operators_list=self.operators_list, is_list=True)
+
+    @staticmethod
+    def resolver(g_schema, mongo_doc, operators_single=None, operators_list=None, is_list=False):
+        def auto_resolver(root, args, contex, info):
+            return resolver_query(g_schema, mongo_doc, args, info, is_list=is_list)
+
+        if is_list:
+            return graphene.List(g_schema, **operators_list, resolver=auto_resolver)
+        else:
+            return graphene.Field(g_schema, **operators_single, resolver=auto_resolver)

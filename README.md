@@ -1,100 +1,120 @@
-# MongographQL
-Implementation of Graphene and MongoEngine
-<br>
-<br>
+# GrapheneMongo
 
-## The proposal
+GrapheneMongo is a library that integrates <a href="https://github.com/graphql-python/graphene/" target="_blank">Graphene</a> with <a target="_blank" href="https://github.com/MongoEngine/mongoengine">MongoeEngine</a>
 
-Assume that you have the follow Document:
+<hr>
 
+### Examples
+Given that mongoengine Document:
 ```python
 class User(Document):
-    name = StringField()
-    age = IntField()
-    favorite_colors = ListField(StringField())
+    username = StringField()
+    creation_date = DateTimeField()
+    favourite_color = ListField()
 ```
-To create a graphene schema for that document we can do:
+To generage a graphene schema for that Document we create a class that is subclass of graphene_mongo.MongoSchema, or we can also just call it passing the model as first argument:
 ```python
-class UserSchema(graphene.ObjectType):
-    name = graphene.String()
-    age = graphene.Int() 
-    favorite_colors = graphene.List(graphene.String)
-    
-class Query(graphene.ObjectType):
-    user = graphene.Field(UserSchema, name=graphene.String(),
-                                      age=graphene.Int(),
-                                      favorite_colors=graphene.List(graphene.String))
-    
-    def resolve_user(self, args, context, info):
-        ## It's necessary some bit of code to get 'args' and pass to 'User' query
-        ## and return that as a dict with the results of each field 
-        return UserSchema(**args)
-```
-Note that the example has a bit of 'duplicated' code in this example. 
-
-The proposal of MongographQL is to make it cleaner and do all the work of query's and resolve things in background for you:
-
-```python
-class UserSchema(MongraphSchema):
+from graphene_mongo import MongoSchema
+class UserSchema(MongoSchema):
     model = User
-    
-class Query(graphene.ObjectType):
-    user = UserSchema.single()  # return the first that matchs the query
-    users = UserSchema.list()   # return a list of the objects that matchs the query
+# OR
+UserSchema = MongoSchema(User)
 ```
+The schema now it's generated. Now it's necessary to create a graphene object Query:
+```python
+class Query(graphene.ObjectType):
+    user = UserSchema.single
+schema = graphene.Schema(query=Query)
+
+# now we can do the query:
+result = schema.execute("""
+query Data {
+    user(username: "John") {
+		id
+		username
+    }
+}""")
+```
+
+You may notice the UserSchema.single atribute in the example above, the class UserSchema has many other atrributes. We explain they all below:
+| Atribute | Description  |
+|---|---|
+| single | We use single we want that the query result be a unique result. That's the same that make the query in mongoengine calling .first() to get the first object that matchs the query.  |
+| list |  List is used when we want a list of the documents that matchs the query. |
+| model  | That's easy, this attribute stores the original Document of mongoengine that you created. |
+| fields |  This field is more consult, you can use the fields that was converted from mongoengine to graphene. For instance, in our UserSchema class the attribute field will be adict like this: {'username': graphene.String}|
+| mutation | Mutate is the atribute that we use when creating Mutations with graphene. See more in REFERENCE TO MUTATIONS |
+
 <br>
 
-## Flask example
-```bash
-cd ~/ && git clone https://github.com/joaovitorsilvestre/MongographQL.git && cd ~/MongographQL
-mkvirtualenv MongographQL -p `which python3`
-pip install -r requirements.txt && pip install -r dev-requirements.txt
-export FLASK_APP=~/MongographQL/flask_example/__init__.py
-flask run
-```
+## Mutations
 
-Now is running on <a hfef="http://127.0.0.1:5000/graphql" target="_blank">http://127.0.0.1:5000/graphql</a>, try with this <a href="http://127.0.0.1:5000/graphql?query=query%20data%20%7B%0A%20%20user%20%7B%0A%20%20%09username%0A%20%20%20%20id%0A%20%20%20%20bank%20%7B%0A%20%20%20%20%20%20name%0A%20%20%20%20%7D%0A%20%20%7D%0A%20%20posts%20%7B%0A%20%20%20%20title%0A%20%20%7D%0A%7D&operationName=data" target="_blank">query</a>:
+Somethimes we need to save new data in the mongodb instead of doing querys. Mutation that do that job.
+We will use the <b>UserSchema</b> that we create in the examples. As before we created a graphene object called Query to handle the query, we now need to do the same to Mutation:
+
+```python
+class Mutation(graphene.ObjectType):
+    create_user = UserSchema.mutate
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
 ```
-query data {
-  user {
-  	username
-    id
-    bank {
-      name
+Notice that we updated the variable schema to has the mutation object too.
+Now we can do the mutation query and create a new user in our database:
+```python
+result = schema.execute("""
+mutation testMutation {
+  createPerson(username:"John") {
+    person {
+    	id
+    	username
     }
   }
-  posts {
-    title
-  }
-}
+}""")
 ```
 
-### Suported Fields
-IntField, FloatField, StringField, BooleanField, ReferenceField, DateTimeField, LongField, ListField, ObjectId,        URLField, PointField, DictField, EmailField, DecimalField, BinaryField, SortedListField
+We pass pass the attributes that we want to save in the 'params', as wee did in "...createPerson(username:"John")..."
 
-### You can also use operators in query:
+In this example graphene-mongo handled the save of the object to you, but somethimes you need to make validations before actualy save the object in to database. How you can do that is explain next.
+
+### Verifications before save
+To use your own function to save you need to create a function in the MongoSchema class called <b>mutate</b>. Said that, lets update our UserSchema as follows:
+```python
+class UserSchema(MongoSchema):
+    model = User
+
+    @staticmethod
+    def mutate(args, context):
+    	new_user = User(**args)
+        new_user.creation_date = datetime.now()
+        new_user.save()
+        return new_user
 ```
-query data {
-  user(username_Contains:"Joh") {
-  	username
-  }
-  posts(title_In:["Post1", "Post2"]) {
-    title
-  }
-}
+
+There's not many rules here, you only need to be sure that the method receive two parameters, has the the staticmethod decorator and returns the instance of the object.
+
+The <b>context</b> parameter has the request object of the framework that you're using. If you're using flask for instance, that parameter will be the <a href="http://werkzeug.pocoo.org/docs/0.12/local/#werkzeug.local.LocalProxy" target="_blank">flask global request</a>.
+
+
+
+## Operators in query
+
+Mongoengine offer many kinds of operators to use as 'in', 'gte', etc. See all operators in <a target="_blank" heft="http://docs.mongoengine.org/guide/querying.html#query-operators">mongoengine documentation</a>. With Graphene-mongo you can use they in  your query:
+```python
+result = schema.execute("""
+query Data {
+    user(username_Icontains: "John", creationDate_Gte:"1997-04-28", favouriteColor_In:["red", "blue"]) {
+		id
+		username
+    }
+}""")
 ```
 
-### Suported Operators
-in, nin, lt, lte, gt, gte, exists, size, all, exact, iexact, contains, icontains, startswith, istartswith, endswith, iendswith
+The best is that they are all supported by graphene-mongo.
 
-
-### Another examples
-<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/example.py" target="_blank">Simple example</a>
 <br>
-<a href="https://github.com/joaovitorsilvestre/MongographQL/blob/master/complex_example.py" target="_blank">Complex example</a>
+<hr>
+<br>
 
-## Run tests
-``` bash
-> py.test --cov MongographQL --verbose
-> py.test --cov-report html --cov MongographQL --verbose
-```
+### TODOs
+* Accept user mutation return None;
+* Support ReferenceField of 'self' without raises 'maximum recursion' error.

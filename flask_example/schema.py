@@ -1,29 +1,47 @@
 from datetime import datetime
 
 import graphene
-from MongographQL import MongraphSchema
+from graphene_mongo import MongoSchema
 from .models import User, Bank, Post
 
 
-class PostSchema(MongraphSchema):
+class PostSchema(MongoSchema):
     model = Post
 
 
-class BankSchema(MongraphSchema):
+class BankSchema(MongoSchema):
     model = Bank
 
 
-class UserSchema(MongraphSchema):
+class UserSchema(MongoSchema):
     model = User
+
+    @staticmethod
+    def mutate(args, context):
+        print(type(context))
+        # context is the flask global request
+        u = User(**args)
+        u.creation_date = datetime.now()
+        u.save()
+        return u
+
+
+class Person(graphene.ObjectType):
+    name = graphene.String()
+    age = graphene.Int()
 
 
 class Query(graphene.ObjectType):
-    user = UserSchema.single()
-    bank = BankSchema.single()
-    post = PostSchema.single()
-    posts = PostSchema.list()
+    user = UserSchema.single
+    bank = BankSchema.single
+    post = PostSchema.single
+    posts = PostSchema.list
 
-schema = graphene.Schema(query=Query)
+
+class Mutation(graphene.ObjectType):
+    create_user = UserSchema.mutate
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
 
 
 def save_tests_in_db():

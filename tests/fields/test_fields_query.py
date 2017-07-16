@@ -1,10 +1,10 @@
-from MongographQL import MongraphSchema
+from graphene_mongo import MongoSchema
 
 
 def test_string_field(schema_builder, mock_person):
     p = mock_person(name="John")
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -13,13 +13,14 @@ def test_string_field(schema_builder, mock_person):
        }
     }""")
 
+    assert not result.errors
     assert result.data == {'person': {'name': p.name}}
 
 
 def test_boolean_field(mock_person, schema_builder):
     p = mock_person(active=True)
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -34,7 +35,7 @@ def test_boolean_field(mock_person, schema_builder):
 def test_int_field(mock_person, schema_builder):
     p = mock_person(age=20)
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -49,7 +50,7 @@ def test_int_field(mock_person, schema_builder):
 def test_float_field(mock_person, schema_builder):
     p = mock_person(score=9.5)
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -67,7 +68,7 @@ def test_datetime_field(mock_person, schema_builder):
     birth = datetime(2017, 1, 1)
     p = mock_person(birthday=birth).save()
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
@@ -84,7 +85,7 @@ def test_datetime_field(mock_person, schema_builder):
 def test_id_field(mock_person, schema_builder):
     p = mock_person()
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -101,7 +102,7 @@ def test_url_field(mock_person, schema_builder):
 
     p = mock_person(site_url=site_url)
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -123,7 +124,7 @@ def test_dict_field(mock_person, schema_builder):
     p = mock_person(book_info=info)
     p.save()
 
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -139,7 +140,7 @@ def test_dict_field(mock_person, schema_builder):
 def test_email_field(mock_person, schema_builder):
     p = mock_person(email="test@test.com.br")
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -155,7 +156,7 @@ def test_long_field(mock_person, schema_builder):
     long = pow(2, 63) - 1
     p = mock_person(super_id=long)
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -171,7 +172,7 @@ def test_long_field(mock_person, schema_builder):
 def test_decimal_field(mock_person, schema_builder):
     p = mock_person(remember_pi=3.14159265359)
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -186,7 +187,7 @@ def test_decimal_field(mock_person, schema_builder):
 def test_binary_field(mock_person, schema_builder):
     p = mock_person(nickname=b"John armless")
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -201,7 +202,7 @@ def test_binary_field(mock_person, schema_builder):
 def test_point_field(mock_person, schema_builder):
     p = mock_person(location=[29.977291, 31.132493])
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -221,7 +222,7 @@ def test_point_field(mock_person, schema_builder):
 def test_list_field(mock_person, schema_builder):
     p = mock_person(favourite_colors=['blue', 'red'])
     p.save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -240,7 +241,7 @@ def test_list_reference_field(mock_person, mock_post, schema_builder):
     post2.save()
 
     mock_person(posts=[post1, post2]).save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {
@@ -264,7 +265,7 @@ def test_reference_field(mock_person, mock_post, schema_builder):
     post.save()
 
     mock_person(best_post=post).save()
-    PersonSchema = MongraphSchema(mock_person)
+    PersonSchema = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(""" query testQuery {

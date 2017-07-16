@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from MongographQL import MongraphSchema
+from graphene_mongo import MongoSchema
 
 
 query = lambda operators: """ query testQuery {
@@ -35,7 +35,7 @@ def test_no_operator(schema_builder, mock_person_filled):
     """ without operator we consider that is a string with an id """
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(query('id:"' + str(p.id) + '"'))
@@ -46,7 +46,7 @@ def test_no_operator(schema_builder, mock_person_filled):
 def test_ne(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -60,7 +60,7 @@ def test_ne(schema_builder, mock_person_filled):
 def test_lt(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -77,7 +77,7 @@ def test_lt(schema_builder, mock_person_filled):
 def test_lte(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -94,7 +94,7 @@ def test_lte(schema_builder, mock_person_filled):
 def test_gt(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -111,7 +111,7 @@ def test_gt(schema_builder, mock_person_filled):
 def test_gte(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -128,7 +128,7 @@ def test_gte(schema_builder, mock_person_filled):
 def test_in(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(query('id_In:["' + str(p.id) + '"]'))
@@ -141,7 +141,7 @@ def test_nin(schema_builder, mock_person_filled, mock_person):
     p2 = mock_person()
     p1.save()
     p2.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
     result = schema.execute(query('id_Nin:["' + str(p1.id) + '"]'))
@@ -150,24 +150,10 @@ def test_nin(schema_builder, mock_person_filled, mock_person):
     assert result.data['person'].get('id') == str(p2.id)
 
 
-def test_all(schema_builder, mock_person_filled):
-    p = mock_person_filled()
-    p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
-
-    schema = schema_builder([(PersonSchema, PersonSchema.single)])
-
-    result = schema.execute(query('name_All:["' + p.name + '"]'))
-    assert result.data['person'].get('id') == str(p.id)
-
-    result = schema.execute(query('name_All:["Test"]'))
-    assert result.data['person'] is None
-
-
 def test_size(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -181,7 +167,7 @@ def test_size(schema_builder, mock_person_filled):
 def test_exists(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -195,7 +181,7 @@ def test_exists(schema_builder, mock_person_filled):
 def test_exact(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -209,7 +195,7 @@ def test_exact(schema_builder, mock_person_filled):
 def test_iexact(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -223,7 +209,7 @@ def test_iexact(schema_builder, mock_person_filled):
 def test_contains(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -237,7 +223,7 @@ def test_contains(schema_builder, mock_person_filled):
 def test_icontains(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -251,7 +237,7 @@ def test_icontains(schema_builder, mock_person_filled):
 def test_startswith(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -262,7 +248,7 @@ def test_startswith(schema_builder, mock_person_filled):
 def test_istartswith(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -273,7 +259,7 @@ def test_istartswith(schema_builder, mock_person_filled):
 def test_endswith(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 
@@ -285,7 +271,7 @@ def test_endswith(schema_builder, mock_person_filled):
 def test_iendswith(schema_builder, mock_person_filled):
     p = mock_person_filled()
     p.save()
-    PersonSchema = MongraphSchema(mock_person_filled)
+    PersonSchema = MongoSchema(mock_person_filled)
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)])
 

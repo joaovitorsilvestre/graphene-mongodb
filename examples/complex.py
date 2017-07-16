@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 
 from mongoengine import *
-from MongographQL import MongraphSchema, utils
+from graphene_mongo import MongoSchema
 import graphene
 
 
@@ -31,6 +31,7 @@ class Bank(Document):
 bank = Bank(name="Caixa",
             country=brazil,
             location=[29.977291, 31.132493])
+
 
 class User(Document):
     username = StringField()
@@ -74,24 +75,25 @@ bank.save()
 user.save()
 
 
-class PostsSchema(MongraphSchema):
+class PostsSchema(MongoSchema):
     model = Posts
 
 
-class CountrySchema(MongraphSchema):
+class CountrySchema(MongoSchema):
     model = Country
 
 
-class BankSchema(MongraphSchema):
+class BankSchema(MongoSchema):
     model = Bank
 
 
-class UserSchema(MongraphSchema):
+class UserSchema(MongoSchema):
     model = User
 
 
 class Query(graphene.ObjectType):
-    user = UserSchema.single()
+    user = UserSchema.single
+
 
 schema = graphene.Schema(query=Query)
 
@@ -126,8 +128,11 @@ result = schema.execute("""query Data {
     }
 }""")
 
-parsed = {k: dict(v) for k, v in dict(result.data).items()}
-print(json.dumps(parsed, indent=4, sort_keys=True))
+if not result.errors:
+    parsed = {k: dict(v) for k, v in dict(result.data).items()}
+    print(json.dumps(parsed, indent=4, sort_keys=True))
+else:
+    print(errors)
 
 user.delete()
 bank.delete()

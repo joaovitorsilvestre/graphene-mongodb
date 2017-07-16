@@ -1,7 +1,7 @@
 import json
 
 from mongoengine import *
-from MongographQL import MongraphSchema
+from graphene_mongo import MongoSchema
 import graphene
 
 
@@ -22,13 +22,12 @@ user = User(username="John",
 user.save()
 
 
-class UserSchema(MongraphSchema):
+class UserSchema(MongoSchema):
     model = User
 
 
 class Query(graphene.ObjectType):
-    user = UserSchema.single()
-    users = UserSchema.list()
+    user = UserSchema.single
 
 schema = graphene.Schema(query=Query)
 
@@ -42,6 +41,10 @@ result = schema.execute("""query Data {
     }
 }""")
 
-parsed = {k: dict(v) for k, v in dict(result.data).items()}
-print(json.dumps(parsed, indent=4, sort_keys=True))
+if not result.errors:
+    parsed = {k: dict(v) for k, v in dict(result.data).items()}
+    print(json.dumps(parsed, indent=4, sort_keys=True))
+else:
+    print(result.errors)
+
 user.delete()

@@ -1,4 +1,4 @@
-from MongographQL import MongraphSchema
+from graphene_mongo import MongoSchema
 
 
 def test_skip_parameter(schema_builder, mock_person):
@@ -7,7 +7,7 @@ def test_skip_parameter(schema_builder, mock_person):
     for p in persons:
         p.save()
 
-    PersonSchemaList = MongraphSchema(mock_person)
+    PersonSchemaList = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchemaList, PersonSchemaList.list)])
     result = schema.execute(""" query testQuery {
@@ -28,7 +28,7 @@ def test_limit_parameter(schema_builder, mock_person):
     for p in persons:
         p.save()
 
-    PersonSchemaList = MongraphSchema(mock_person)
+    PersonSchemaList = MongoSchema(mock_person)
 
     schema = schema_builder([(PersonSchemaList, PersonSchemaList.list)])
     result = schema.execute(""" query testQuery {
