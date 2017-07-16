@@ -44,7 +44,7 @@ You may notice the UserSchema.single atribute in the example above, the class Us
 | list  | List is used when we want a list of the documents that matchs the query. |
 | model  | That's easy, this attribute stores the original Document of mongoengine that you created. |
 | fields |  This field is more consult, you can use the fields that was converted from mongoengine to graphene. For instance, in our UserSchema class the attribute field will be adict like this: {'username': graphene.String}|
-| mutation | Mutate is the atribute that we use when creating Mutations with graphene. See more in REFERENCE TO MUTATIONS |
+| mutation | Mutate is the atribute that we use when creating Mutations with graphene. See more in [Mutations](#Mutations) |
 
 <br>
 
