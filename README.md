@@ -98,7 +98,7 @@ The <b>context</b> parameter has the request object of the framework that you're
 
 ## Operators in query
 
-Mongoengine offer many kinds of operators to use as 'in', 'gte', etc. See all operators in <a target="_blank" heft="http://docs.mongoengine.org/guide/querying.html#query-operators">mongoengine documentation</a>. With Graphene-mongo you can use they in  your query:
+Mongoengine offer many kinds of operators to use as 'in', 'gte', etc. See all operators in <a target="_blank" href="http://docs.mongoengine.org/guide/querying.html#query-operators">mongoengine documentation</a>. With Graphene-mongo you can use they in  your query:
 ```python
 result = schema.execute("""
 query Data {
