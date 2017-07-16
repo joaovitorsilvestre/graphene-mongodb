@@ -7,7 +7,7 @@ from mongoengine.connection import connect, disconnect
 @pytest.yield_fixture(scope="function")
 def mongo():
     db_name = str(random.randint(0, 5000000000000000000))
-    connection = connect(db=db_name)
+    connection = connect(db=db_name, host="mongomock://localhost")
     yield
     connection.drop_database(db_name)
     disconnect()

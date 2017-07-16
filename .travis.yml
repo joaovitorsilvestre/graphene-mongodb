@@ -4,7 +4,14 @@ python:
   - "3.5"
 
 install:
+  - pip install pytest-cov
+  - pip install coveralls
+  - pip install mongomock
   - pip install -r requirements.txt
   - pip install -r dev-requirements.txt
 
-script: py.test
+script:
+  - py.test
+
+after_success:
+  - coveralls

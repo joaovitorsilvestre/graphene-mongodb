@@ -1,5 +1,5 @@
+import pytz
 import pytest
-
 from datetime import datetime
 from mongoengine import *
 
@@ -50,7 +50,7 @@ def mock_person_filled(mongo, mock_post):
         active = BooleanField(default=True)
         age = IntField(default=20)
         score = FloatField(default=5.0)
-        birthday = DateTimeField(default=datetime.now())
+        birthday = DateTimeField(default=datetime.now(pytz.utc))
         site_url = URLField(default="http://www.test.com.br")
         book_info = DictField(default={'author': 'John'})
         email = EmailField(default='john@test.com.br')
