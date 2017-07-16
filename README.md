@@ -2,6 +2,7 @@
 
 GrapheneMongo is a library that integrates <a href="https://github.com/graphql-python/graphene/" target="_blank">Graphene</a> with <a target="_blank" href="https://github.com/MongoEngine/mongoengine">MongoeEngine</a>
 &nbsp; [![Build Status](https://travis-ci.org/joaovitorsilvestre/graphene-mongo.svg?branch=master)](https://travis-ci.org/joaovitorsilvestre/graphene-mongo)
+[![Coverage Status](https://coveralls.io/repos/github/joaovitorsilvestre/graphene-mongo/badge.svg?branch=master)](https://coveralls.io/github/joaovitorsilvestre/graphene-mongo?branch=master)
 <hr>
 
 ### Examples
