@@ -37,10 +37,11 @@ query Data {
 ```
 
 You may notice the UserSchema.single atribute in the example above, the class UserSchema has many other atrributes. We explain they all below:
-| Atribute | Description  |
-|---|---|
-| single | We use single we want that the query result be a unique result. That's the same that make the query in mongoengine calling .first() to get the first object that matchs the query.  |
-| list |  List is used when we want a list of the documents that matchs the query. |
+
+| Atribute  | Description |
+| ------------- | ------------- |
+|  single  |  We use single we want that the query result be a unique result. That's the same that make the query in mongoengine calling .first() to get the first object that matchs the query.  |
+| list  | List is used when we want a list of the documents that matchs the query. |
 | model  | That's easy, this attribute stores the original Document of mongoengine that you created. |
 | fields |  This field is more consult, you can use the fields that was converted from mongoengine to graphene. For instance, in our UserSchema class the attribute field will be adict like this: {'username': graphene.String}|
 | mutation | Mutate is the atribute that we use when creating Mutations with graphene. See more in REFERENCE TO MUTATIONS |
