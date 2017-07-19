@@ -35,8 +35,8 @@ schema = graphene.Schema(query=Query)
 result = schema.execute("""
 query Data {
     user(username: "John") {
-		id
-		username
+	id
+	username
     }
 }""")
 ```
@@ -109,8 +109,8 @@ Mongoengine offer many kinds of operators to use as 'in', 'gte', etc. See all op
 result = schema.execute("""
 query Data {
     user(username_Icontains: "John", creationDate_Gte:"1997-04-28", favouriteColor_In:["red", "blue"]) {
-		id
-		username
+	id
+	username
     }
 }""")
 ```
