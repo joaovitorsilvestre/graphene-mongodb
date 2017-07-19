@@ -69,7 +69,7 @@ Now we can do the mutation query and create a new user in our database:
 ```python
 result = schema.execute("""
 mutation testMutation {
-  createPerson(username:"John") {
+  createUser(username:"John") {
     person {
     	id
     	username
