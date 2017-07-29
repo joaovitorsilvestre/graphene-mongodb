@@ -17,6 +17,7 @@ class Options:
         model = attrs.get('model')
         mutate = attrs.get('mutate')
         validator = attrs.get('validator')
+        validator = validator.__func__ if isinstance(validator, staticmethod) else validator
 
         if model is None:
             raise AttributeError('Failed to generate schema {},'
@@ -59,10 +60,6 @@ class Options:
             raise AttributeError("'validator' attribute must be callable.")
         elif validator and len(inspect.signature(validator).parameters) != 4:
             raise AttributeError("The 'validator' attribute must be a callable that accepts four arguments: "
-                                 "model, fields, query, special_params. \n"
-                                 "model:            mongoengine.Document that the opration is to be made, \n"
-                                 "fields:           list of fields that was requested, \n"
-                                 "query:            dict with the query parameters, \n"
-                                 "special_params:   dict with params used to improve query, as 'limit' and 'skip'")
+                                 "model, fields, query, special_params")
 
         return model, mutate.__func__ if mutate else None, model._fields, validator
