@@ -33,10 +33,10 @@ schema = graphene.Schema(query=Query)
 # now we can do the query:
 result = schema.execute("""
 query Data {
-    user(username: "John") {
-		id
-		username
-    }
+  user(username: "John") {
+    id
+	username
+  }
 }""")
 ```
 
@@ -70,8 +70,8 @@ result = schema.execute("""
 mutation testMutation {
   createPerson(username:"John") {
     person {
-    	id
-    	username
+      id
+      username
     }
   }
 }""")
@@ -107,19 +107,32 @@ Mongoengine offer many kinds of operators to use as 'in', 'gte', etc. See all op
 ```python
 result = schema.execute("""
 query Data {
-    user(username_Icontains: "John", creationDate_Gte:"1997-04-28", favouriteColor_In:["red", "blue"]) {
-		id
-		username
-    }
+  user(username_Icontains: "John", creationDate_Gte:"1997-04-28", favouriteColor_In:["red", "blue"]) {
+	id
+	username
+  }
 }""")
 ```
 
 The best is that they are all supported by graphene-mongo.
 
+
+## Validate permissions to do querys and mutations
+To validate if a user can access some field you can create an atribute called <b>validator</b>:
+```python
+class UserSchema(MongoSchema):
+    model = User
+
+    def validator(model, fields, query, special_params):
+    	if 'not_alowed_field' in fields:
+        	raise Exception('Unauthorized Access')
+```
+
+When a validator function exists, GrapheneMongo will call it in every query or mutation of the respective schema.
+Just be sure to raise a excelption that graphene will be responsible to send it back to graphql client in front.
+
 <br>
 <hr>
-<br>
-
 
 ### TODOs
 * Accept user mutation return None;
