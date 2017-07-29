@@ -91,3 +91,25 @@ def test_mongoengine_field_references_self():
     assert str(e_info.value) == "It was not possible to generate schema for {} because the field {} is a " \
                                 "ReferenceField to self and this is not supported yet."\
                                 .format("TestSchema", 'parent')
+
+
+def test_validator_wrong():
+    from mongoengine import Document, StringField
+
+    class Test(Document):
+        parent = StringField()
+
+    with pytest.raises(Exception) as e_info:
+        Options('TestSchema', {'model': Test, 'validator': True})
+
+    assert str(e_info.value) == "'validator' attribute must be callable."
+
+    with pytest.raises(Exception) as e_info:
+        Options('TestSchema', {'model': Test, 'validator': lambda x: x})
+
+    assert str(e_info.value) == ("The 'validator' attribute must be a callable that accepts four arguments: "
+                                 "model, fields, query, special_params. \n"
+                                 "model:            mongoengine.Document that the opration is to be made, \n"
+                                 "fields:           list of fields that was requested, \n"
+                                 "query:            dict with the query parameters, \n"
+                                 "special_params:   dict with params used to improve query, as 'limit' and 'skip'")

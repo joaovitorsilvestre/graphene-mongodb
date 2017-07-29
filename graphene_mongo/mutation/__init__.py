@@ -24,6 +24,7 @@ def gen_mutation(model, graphene_schema, operators_mutation, fields_mutation, mu
     def user_mutate(root, args, context, info):
         if validator:
             validator(model, args, {}, {})
+
         obj = mutate_func(args, context)
         if not isinstance(obj, model):
             raise TypeError('Failed to resolve mutation of the schema {}'
@@ -36,6 +37,7 @@ def gen_mutation(model, graphene_schema, operators_mutation, fields_mutation, mu
     def generic_mutate(root, args, context, info):
         if validator:
             validator(model, args, {}, {})
+
         obj = model(**args)
         obj.save()
         graphene_obj = mongo_to_graphene(obj, graphene_schema, fields_mutation)
