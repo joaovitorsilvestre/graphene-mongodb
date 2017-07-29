@@ -6,9 +6,10 @@ from graphene_mongo.mutation import gen_mutation
 
 
 class ModelSchema:
-    def __init__(self, model, mutate, attrs_mongo_doc):
+    def __init__(self, model, attrs_mongo_doc, mutate, validator):
         self.model = model
         self.mutate_func = mutate  # mutate function that user specified
+        self.validator = validator
 
         self.fields, self.fields_mutation, self.operators_mutation,\
             self.operators_single, self.operators_list = convert_fields(attrs_mongo_doc)
@@ -25,18 +26,21 @@ class ModelSchema:
         }
 
     def mutate(self):
-        return gen_mutation(self.model, self.schema, self.operators_mutation, self.fields_mutation, self.mutate_func)
+        return gen_mutation(self.model, self.schema, self.operators_mutation, self.fields_mutation, self.mutate_func,
+                            self.validator)
 
     def single(self):
-        return ModelSchema.resolver(self.schema, self.model, operators_single=self.operators_single)
+        return ModelSchema.resolver(self.schema, self.model, operators_single=self.operators_single,
+                                    validator=self.validator)
 
     def list(self):
-        return ModelSchema.resolver(self.schema, self.model, operators_list=self.operators_list, is_list=True)
+        return ModelSchema.resolver(self.schema, self.model, operators_list=self.operators_list,
+                                    validator=self.validator, is_list=True)
 
     @staticmethod
-    def resolver(g_schema, mongo_doc, operators_single=None, operators_list=None, is_list=False):
+    def resolver(g_schema, mongo_doc, operators_single=None, operators_list=None, is_list=False, validator=None):
         def auto_resolver(root, args, contex, info):
-            return resolver_query(g_schema, mongo_doc, args, info, is_list=is_list)
+            return resolver_query(g_schema, mongo_doc, args, info, is_list=is_list, validator=validator)
 
         if is_list:
             return graphene.List(g_schema, **operators_list, resolver=auto_resolver)

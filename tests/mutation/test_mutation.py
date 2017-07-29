@@ -6,10 +6,10 @@ def test_gen_mutation(mock_person):
     from graphene_mongo.mutation import gen_mutation
     from graphene_mongo.model import ModelSchema
 
-    model_schema = ModelSchema(mock_person, None, mock_person._fields)
+    model_schema = ModelSchema(mock_person, mock_person._fields, None, None)
 
     result = gen_mutation(mock_person, model_schema.schema, model_schema.operators_mutation,
-                          model_schema.fields_mutation, None)
+                          model_schema.fields_mutation, None, None)
 
     assert issubclass(result, graphene.Mutation)
     assert hasattr(result, 'mutate')
@@ -33,10 +33,10 @@ def test_gen_mutation_user_mutation_func(mock_person):
         u.save()
         return u
 
-    model_schema = ModelSchema(mock_person, mutate, mock_person._fields)
+    model_schema = ModelSchema(mock_person, mock_person._fields, mutate, None)
 
     user_mutate_func = gen_mutation(mock_person, model_schema.schema, model_schema.operators_mutation,
-                          model_schema.fields_mutation, mutate)
+                          model_schema.fields_mutation, mutate, None)
 
     assert issubclass(user_mutate_func, graphene.Mutation)
     assert hasattr(user_mutate_func, 'mutate')

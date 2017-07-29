@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 import inspect
 from mongoengine import Document
 from graphene_mongo.operators import list_fields, reference_fields
@@ -9,12 +10,13 @@ class Options:
 
     def __init__(self, class_name, attrs):
         self.class_name = class_name
-        self.model, self.mutate, self.mongo_fields = self.verified_attrs(attrs)
+        self.model, self.mutate, self.mongo_fields, self.validator = self.verified_attrs(attrs)
 
     def verified_attrs(self, attrs):
         """ Function to verify if the attributes is of the right type """
         model = attrs.get('model')
         mutate = attrs.get('mutate')
+        validator = attrs.get('validator')
 
         if model is None:
             raise AttributeError('Failed to generate schema {},'
@@ -53,5 +55,14 @@ class Options:
                                               "field {} is a ReferenceField to self and this is not supported yet."
                                               .format(self.class_name, f_name))
 
+        if validator and not callable(validator):
+            raise AttributeError("'validator' attribute must be callable.")
+        elif validator and len(inspect.signature(validator).parameters) != 4:
+            raise AttributeError("The 'validator' attribute must be a callable that accepts four arguments: "
+                                 "model, fields, query, special_params. \n"
+                                 "model:            mongoengine.Document that the opration is to be made, \n"
+                                 "fields:           list of fields that was requested, \n"
+                                 "query:            dict with the query parameters, \n"
+                                 "special_params:   dict with params used to improve query, as 'limit' and 'skip'")
 
-        return model, mutate.__func__ if mutate else None, model._fields
+        return model, mutate.__func__ if mutate else None, model._fields, validator
