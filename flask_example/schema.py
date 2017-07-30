@@ -5,6 +5,14 @@ from graphene_mongo import MongoSchema
 from .models import User, Bank, Post
 
 
+def verify_permission(model, fields, query, special_params):
+    try:
+        print(model, fields, query, special_params)
+        assert True
+    except Exception:
+        raise Exception('Unauthorized Access')
+
+
 class PostSchema(MongoSchema):
     model = Post
 
@@ -15,10 +23,10 @@ class BankSchema(MongoSchema):
 
 class UserSchema(MongoSchema):
     model = User
+    validator = verify_permission
 
     @staticmethod
     def mutate(args, context):
-        print(type(context))
         # context is the flask global request
         u = User(**args)
         u.creation_date = datetime.now()

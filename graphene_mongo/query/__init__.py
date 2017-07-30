@@ -17,10 +17,13 @@ def do_query(m_object, query, fields, special_params, is_list):
     return query
 
 
-def resolver_query(g_object, m_object, args, info, is_list=False):
+def resolver_query(g_object, m_object, args, info, is_list=False, validator=None):
     fields = [to_snake_case(f) for f in get_fields(info)]
     query = parse_operators(args)
     special_params = {k: v for k, v in args.items() if k in ['skip', 'limit']}
+
+    if validator:
+        validator(m_object, fields, query, special_params)
 
     result = do_query(m_object, query, fields, special_params, is_list)
 

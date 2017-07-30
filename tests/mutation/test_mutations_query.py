@@ -1,5 +1,6 @@
 import pytest
 
+
 def test_gen_mutation_user_mutation_func(schema_builder, mock_person):
     from graphene_mongo import MongoSchema
 
@@ -67,10 +68,10 @@ def test_gen_mutation_user_mutate_wrong_return(schema_builder, mock_person):
     def mutate(args, context):
         return False
 
-    model_schema = ModelSchema(mock_person, mutate, mock_person._fields)
+    model_schema = ModelSchema(mock_person, mock_person._fields, mutate, None)
 
     result = gen_mutation(mock_person, model_schema.schema, model_schema.operators_mutation,
-                          model_schema.fields_mutation, model_schema.mutate_func)
+                          model_schema.fields_mutation, model_schema.mutate_func, None)
 
     assert issubclass(result, graphene.Mutation)
     assert hasattr(result, 'mutate')
