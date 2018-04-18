@@ -1,7 +1,0 @@
-mongomock==3.8.0
-py==1.4.32
-pytest==3.0.6
-pytest-cov==2.5.1
-pytz==2017.2
-Flask==0.12.2
-Flask-GraphQL==1.4.1
