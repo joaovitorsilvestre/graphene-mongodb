@@ -15,17 +15,19 @@ def mongo():
 
 @pytest.fixture(scope='function')
 def schema_builder():
-    def build(schemas, mutations=None):
+    def build(schemas=None, mutations=None):
+        Query = None
+        Mutation = None
 
-        attrs = {schema[0].model.__name__.lower(): schema[1] for schema in schemas}
-        Query = type('Query', (graphene.ObjectType,), attrs)
+        if schemas:
+            attrs = {schema[0].model.__name__.lower(): schema[1] for schema in schemas}
+            Query = type('Query', (graphene.ObjectType,), attrs)
 
         if mutations:
             attrs = {'create_' + m.model.__name__.lower(): m.mutate for m in mutations}
             Mutation = type('Mutation', (graphene.ObjectType,), attrs)
-            return graphene.Schema(query=Query, mutation=Mutation)
 
-        return graphene.Schema(query=Query)
+        return graphene.Schema(query=Query, mutation=Mutation)
 
     return build
 

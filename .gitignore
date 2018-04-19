@@ -8,3 +8,5 @@ shell.py
 *.pyc
 lastfailed
 nodeids
+.pytest_cache/
+.vscode/
