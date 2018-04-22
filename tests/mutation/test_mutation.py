@@ -1,7 +1,7 @@
 def test_gen_mutation(mock_person):
-    import inspect
     import graphene
     from graphene.utils.str_converters import to_snake_case
+    from graphene.types.field import Field
 
     from graphene_mongo.mutation import gen_mutation
     from graphene_mongo.model import ModelSchema
@@ -15,12 +15,9 @@ def test_gen_mutation(mock_person):
     assert hasattr(result, 'mutate')
 
     assert result._meta.name == 'Create' + mock_person.__name__
-    assert result._meta.local_fields[to_snake_case(mock_person.__name__)]
-    assert result._meta.fields[to_snake_case(mock_person.__name__)]
+    assert isinstance(result._meta.fields[to_snake_case(mock_person.__name__)], Field)
 
-    operators_mutation = inspect.signature(result.__dict__['Field']).parameters['args'].default
-
-    assert operators_mutation == model_schema.operators_mutation
+    assert result._meta.arguments == model_schema.operators_mutation
 
 
 def test_gen_mutation_user_mutation_func(mock_person):

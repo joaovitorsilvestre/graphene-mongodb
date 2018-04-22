@@ -5,3 +5,8 @@ shell.py
 .idea
 ./__pycache__
 */__pycache__
+*.pyc
+lastfailed
+nodeids
+.pytest_cache/
+.vscode/

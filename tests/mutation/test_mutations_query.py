@@ -18,7 +18,7 @@ def test_gen_mutation_user_mutation_func(schema_builder, mock_person):
 
         _called_custom_mutate = False  # just to test if the user function mutate was called
 
-    schema = schema_builder([], [PersonSchema])
+    schema = schema_builder(mutations=[PersonSchema])
     result = schema.execute("""mutation testMutation {
         createPerson(name:"Test") {
             person {
@@ -43,7 +43,7 @@ def test_gen_mutation_generic_mutate(schema_builder, mock_person):
     class PersonSchema(MongoSchema):
         model = mock_person
 
-    schema = schema_builder([], [PersonSchema])
+    schema = schema_builder(mutations=[PersonSchema])
     result = schema.execute("""mutation testMutation {
         createPerson(name:"Test") {
             person {
@@ -59,8 +59,9 @@ def test_gen_mutation_generic_mutate(schema_builder, mock_person):
     assert mock_person.objects().first().name == 'Test'
 
 
-def test_gen_mutation_user_mutate_wrong_return(schema_builder, mock_person):
+def test_gen_mutation_user_mutate_wrong_return(mock_person):
     import graphene
+    from graphql.execution.base import ResolveInfo
 
     from graphene_mongo.mutation import gen_mutation
     from graphene_mongo.model import ModelSchema
@@ -77,7 +78,10 @@ def test_gen_mutation_user_mutate_wrong_return(schema_builder, mock_person):
     assert hasattr(result, 'mutate')
 
     with pytest.raises(Exception) as e_info:
-        result.mutate(None, {'name': "Test"}, None, None)
+        context = graphene.types.Context()
+        info = ResolveInfo('name', *[None for i in range(8)], context)
+
+        result.mutate(None, info, **{'name': "Test"})
 
     assert str(e_info.value) == 'Failed to resolve mutation of the schema {}' \
                                 ' because mutate function must return a instance of {}, and the return type was {}.'\

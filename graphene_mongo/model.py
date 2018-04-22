@@ -39,8 +39,8 @@ class ModelSchema:
 
     @staticmethod
     def resolver(g_schema, mongo_doc, operators_single=None, operators_list=None, is_list=False, validator=None):
-        def auto_resolver(root, args, contex, info):
-            return resolver_query(g_schema, mongo_doc, args, info, is_list=is_list, validator=validator)
+        def auto_resolver(root, info, **kwargs):
+            return resolver_query(g_schema, mongo_doc, kwargs, info, is_list=is_list, validator=validator)
 
         if is_list:
             return graphene.List(g_schema, **operators_list, resolver=auto_resolver)
