@@ -1,4 +1,5 @@
 from graphene.types import Scalar
+from graphql.language.ast import FloatValue, IntValue
 
 
 class GenericField(Scalar):
@@ -9,8 +10,19 @@ class GenericField(Scalar):
 
 class CustomDecimalField(Scalar):
     @staticmethod
-    def serialize(_decimal):
-        return float(_decimal)
+    def coerce_float(value):
+        try:
+            return float(value)
+        except ValueError:
+            return None
+
+    serialize = coerce_float
+    parse_value = coerce_float
+
+    @staticmethod
+    def parse_literal(ast):
+        if isinstance(ast, (FloatValue, IntValue)):
+            return float(ast.value)
 
 
 class CustomBinaryField(Scalar):
