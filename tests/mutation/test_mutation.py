@@ -3,8 +3,8 @@ def test_gen_mutation(mock_person):
     from graphene.utils.str_converters import to_snake_case
     from graphene.types.field import Field
 
-    from graphene_mongo.mutation import gen_mutation
-    from graphene_mongo.model import ModelSchema
+    from graphene_mongodb.mutation import gen_mutation
+    from graphene_mongodb.model import ModelSchema
 
     model_schema = ModelSchema(mock_person, mock_person._fields, None, None)
 
@@ -22,8 +22,8 @@ def test_gen_mutation(mock_person):
 
 def test_gen_mutation_user_mutation_func(mock_person):
     import graphene
-    from graphene_mongo.mutation import gen_mutation
-    from graphene_mongo.model import ModelSchema
+    from graphene_mongodb.mutation import gen_mutation
+    from graphene_mongodb.model import ModelSchema
 
     def mutate(args, context):
         u = mock_person(**args)

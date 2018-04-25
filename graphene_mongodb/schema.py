@@ -1,6 +1,6 @@
 from six import with_metaclass
-from graphene_mongo.model import ModelSchema
-from graphene_mongo.options import Options
+from graphene_mongodb.model import ModelSchema
+from graphene_mongodb.options import Options
 
 
 class MongoSchemaMeta(type):
@@ -40,3 +40,4 @@ class MongoSchemaMeta(type):
 class MongoSchema(with_metaclass(MongoSchemaMeta)):
     def __new__(cls, model):
         return type(model.__name__ + 'Schema', (MongoSchema,), {'model': model})
+

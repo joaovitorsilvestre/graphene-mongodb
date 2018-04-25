@@ -2,7 +2,7 @@ import graphene
 from mongoengine import IntField, FloatField, DateTimeField, LongField, DecimalField, BooleanField, ObjectIdField, \
                         DictField, BinaryField, PointField, ListField, SortedListField, ReferenceField, StringField, \
                         URLField, EmailField
-from graphene_mongo.fields.respective import field_to_id
+from graphene_mongodb.fields.respective import field_to_id
 
 # http://docs.mongoengine.org/guide/querying.html#query-operators
 operators = {

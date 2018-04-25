@@ -1,4 +1,4 @@
-from graphene_mongo import MongoSchema
+from graphene_mongodb import MongoSchema
 
 
 def test_validator_raises_error_query(mock_person, schema_builder):

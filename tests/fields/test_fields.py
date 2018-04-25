@@ -3,7 +3,7 @@ import pytest
 
 def test_list_field_no_field():
     """ Assert that raises error if a ListField is given without a type, for instance: ListField() """
-    from graphene_mongo.fields.special_fields import list_field
+    from graphene_mongodb.fields.special_fields import list_field
     from mongoengine import ListField
 
     with pytest.raises(Exception) as e_info:

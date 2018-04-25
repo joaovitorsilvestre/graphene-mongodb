@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 
 from mongoengine import *
-from graphene_mongo import MongoSchema
+from graphene_mongodb import MongoSchema
 import graphene
 
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import graphene
-from graphene_mongo import MongoSchema
+from graphene_mongodb import MongoSchema
 from .models import User, Bank, Post
 
 

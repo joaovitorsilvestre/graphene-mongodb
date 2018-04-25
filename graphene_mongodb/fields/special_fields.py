@@ -3,7 +3,7 @@ import graphene
 
 def reference_field(f_name, mongo_field):
     """ Generate a schema for RefereceField, or get a schema already done saved in _generated_schemas """
-    from graphene_mongo import MongoSchema
+    from graphene_mongodb import MongoSchema
 
     document = mongo_field.document_type_obj  # document that this ReferenceField references
 
@@ -12,8 +12,8 @@ def reference_field(f_name, mongo_field):
 
 
 def list_field(f_name, mongo_field):
-    from graphene_mongo import MongoSchema
-    from graphene_mongo.fields.respective import respective_fields
+    from graphene_mongodb import MongoSchema
+    from graphene_mongodb.fields.respective import respective_fields
 
     list_items_type = type(mongo_field.field)
 

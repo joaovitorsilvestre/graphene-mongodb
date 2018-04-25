@@ -2,7 +2,7 @@ import pytest
 
 
 def test_gen_mutation_user_mutation_func(schema_builder, mock_person):
-    from graphene_mongo import MongoSchema
+    from graphene_mongodb import MongoSchema
 
     assert mock_person.objects().count() == 0
 
@@ -36,7 +36,7 @@ def test_gen_mutation_user_mutation_func(schema_builder, mock_person):
 
 
 def test_gen_mutation_generic_mutate(schema_builder, mock_person):
-    from graphene_mongo import MongoSchema
+    from graphene_mongodb import MongoSchema
 
     assert mock_person.objects().count() == 0
 
@@ -63,8 +63,8 @@ def test_gen_mutation_user_mutate_wrong_return(mock_person):
     import graphene
     from graphql.execution.base import ResolveInfo
 
-    from graphene_mongo.mutation import gen_mutation
-    from graphene_mongo.model import ModelSchema
+    from graphene_mongodb.mutation import gen_mutation
+    from graphene_mongodb.model import ModelSchema
 
     def mutate(args, context):
         return False

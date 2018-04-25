@@ -1,6 +1,6 @@
 import pytest
 
-from graphene_mongo.options import Options
+from graphene_mongodb.options import Options
 
 
 def test_options_no_model():
@@ -50,7 +50,7 @@ def test_mutate_wrong_number_arguments():
 
 
 def test_mongoengine_list_of_field_field_not_implemented():
-    from graphene_mongo.operators import list_fields
+    from graphene_mongodb.operators import list_fields
     from mongoengine import FileField, Document
 
     for list_type in list_fields:

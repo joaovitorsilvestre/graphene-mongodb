@@ -1,8 +1,8 @@
 from collections.abc import Sequence
 import inspect
 from mongoengine import Document
-from graphene_mongo.operators import list_fields, reference_fields
-from graphene_mongo.fields.respective import respective_fields, respective_special_fields
+from graphene_mongodb.operators import list_fields, reference_fields
+from graphene_mongodb.fields.respective import respective_fields, respective_special_fields
 
 
 class Options:
