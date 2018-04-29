@@ -38,3 +38,36 @@ def test_gen_mutation_user_mutation_func(mock_person):
     assert issubclass(user_mutate_func, graphene.Mutation)
     assert hasattr(user_mutate_func, 'mutate')
     assert getattr(user_mutate_func, 'mutate').__name__ == 'user_mutate'
+
+
+def test_mutation_fields(mock_person, schema_builder):
+    from graphene_mongo import MongoSchema
+    from mongoengine import Document, DecimalField
+
+    class Person(Document):
+        remember_pi = DecimalField(precision=11, default=None)
+
+    p = Person(remember_pi=3.14159265359)
+    p.save()
+
+    class PersonSchema(MongoSchema):
+        model = Person
+
+        @staticmethod
+        def mutate(args, context):
+            u = Person(**args)
+            u.save()
+            return u
+
+    schema = schema_builder([(PersonSchema, PersonSchema.single)], [PersonSchema])
+
+    result = schema.execute("""mutation testMutation {
+      createPerson(rememberPi: 3.14159265359) {
+        person {
+          rememberPi
+        }
+      }
+    }""")
+
+    assert not result.errors
+    assert result.data == {'createPerson': {'person': {'rememberPi': 3.14159265359}}}

@@ -10,15 +10,10 @@ def test_validator_raises_error_query(mock_person, schema_builder):
         model = mock_person
         validator = verify_permission
 
-    def mutate(args, context):
-        u = mock_person(**args)
-        u.save()
-        return u
-
     mock_person(name="Test").save()
 
     schema = schema_builder([(PersonSchema, PersonSchema.single)], [PersonSchema])
-    result = schema.execute("""query testQuery {
+    schema.execute("""query testQuery {
         person(name:"Test") {
             name
         }
