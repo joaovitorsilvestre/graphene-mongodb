@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
   name='graphene_mongodb',
   packages=find_packages(exclude=['tests', 'tests.*', 'examples', 'flask_example']),
-  version='1.0.0',
+  version='1.0.1',
   license='MIT',
   description='GrapheneMongo is a library that integrates Graphene with MongoEngine',
   long_description=long_description,
@@ -17,7 +17,7 @@ setup(
   author='João Vitor Silvestre',
   author_email='joaovitorsilvestresousa@gmail.com',
   url='https://github.com/joaovitorsilvestre/graphene-mongo',
-  download_url='https://github.com/joaovitorsilvestre/graphene-mongo/archive/1.0.tar.gz',
+  download_url='https://github.com/joaovitorsilvestre/graphene-mongo/archive/1.0.1.tar.gz',
   keywords=['graphene', 'graphql', 'mongo', 'mongodb', 'mongoDB', 'mongoengine', 'graphene-mongo', 'graphene-mongodb'],
   classifiers=[],
   install_requires=[
