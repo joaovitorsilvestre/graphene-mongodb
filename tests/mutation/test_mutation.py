@@ -41,7 +41,7 @@ def test_gen_mutation_user_mutation_func(mock_person):
 
 
 def test_mutation_fields(mock_person, schema_builder):
-    from graphene_mongo import MongoSchema
+    from graphene_mongodb import MongoSchema
     from mongoengine import Document, DecimalField
 
     class Person(Document):
