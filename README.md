@@ -5,6 +5,11 @@ GrapheneMongodb is a library that integrates <a href="https://github.com/graphql
 [![Coverage Status](https://coveralls.io/repos/github/joaovitorsilvestre/graphene-mongo/badge.svg?branch=master)](https://coveralls.io/github/joaovitorsilvestre/graphene-mongo?branch=master)
 <hr>
 
+## Installation
+```bash
+pip install graphene-mongodb
+```
+
 ### Examples
 Given that mongoengine Document:
 ```python
