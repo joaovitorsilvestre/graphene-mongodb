@@ -1,7 +1,7 @@
 import graphene
 from graphene.utils.str_converters import to_snake_case
 
-from graphene_mongo.query import mongo_to_graphene
+from graphene_mongodb.query import mongo_to_graphene
 
 
 def gen_mutation(model, graphene_schema, operators_mutation, fields_mutation, mutate_func, validator):

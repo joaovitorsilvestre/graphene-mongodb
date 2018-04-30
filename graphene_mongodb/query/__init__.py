@@ -1,5 +1,5 @@
 from graphene.utils.str_converters import to_snake_case
-from graphene_mongo.query.utils import get_fields, parse_operators, mongo_to_graphene
+from graphene_mongodb.query.utils import get_fields, parse_operators, mongo_to_graphene
 
 
 # Options that we can pass as operators to define the query

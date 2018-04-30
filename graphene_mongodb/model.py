@@ -1,8 +1,8 @@
 import graphene
 
-from graphene_mongo.fields import convert_fields
-from graphene_mongo.query import resolver_query
-from graphene_mongo.mutation import gen_mutation
+from graphene_mongodb.fields import convert_fields
+from graphene_mongodb.query import resolver_query
+from graphene_mongodb.mutation import gen_mutation
 
 
 class ModelSchema:

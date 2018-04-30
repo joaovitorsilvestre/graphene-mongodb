@@ -1,9 +1,9 @@
 import graphene
 from mongoengine import ObjectIdField
 
-from graphene_mongo.query import special_query_parameters
-from graphene_mongo.operators import gen_operators_of_field, allowed_operators
-from graphene_mongo.fields.respective import respective_special_fields, respective_fields, field_to_id
+from graphene_mongodb.query import special_query_parameters
+from graphene_mongodb.operators import gen_operators_of_field, allowed_operators
+from graphene_mongodb.fields.respective import respective_special_fields, respective_fields, field_to_id
 
 
 def convert_fields(attrs_mongo_doc):

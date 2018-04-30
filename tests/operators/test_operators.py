@@ -6,8 +6,8 @@ def format_fields(fields):
 
 
 def test_add_operators_to_field_respective_fields():
-    from graphene_mongo.fields.respective import respective_fields
-    from graphene_mongo.operators import gen_operators_of_field, string_operators, allowed_operators, \
+    from graphene_mongodb.fields.respective import respective_fields
+    from graphene_mongodb.operators import gen_operators_of_field, string_operators, allowed_operators, \
                                          fields_string_operators
 
     for m_field, r_graphene in respective_fields.items():
@@ -23,8 +23,8 @@ def test_add_operators_to_field_respective_fields():
 
 def test_add_operators_to_field_list_field():
     from mongoengine import ListField, SortedListField
-    from graphene_mongo.operators import gen_operators_of_field, allowed_operators
-    from graphene_mongo.fields.respective import respective_special_fields, respective_fields
+    from graphene_mongodb.operators import gen_operators_of_field, allowed_operators
+    from graphene_mongodb.fields.respective import respective_special_fields, respective_fields
 
     for m_field in [ListField, SortedListField]:
         for f, r_graphene in respective_fields.items():
@@ -47,8 +47,8 @@ def test_add_operators_to_field_list_field():
 
 def test_add_operators_to_field_reference_field():
     from mongoengine import ReferenceField, Document, StringField
-    from graphene_mongo.operators import gen_operators_of_field, allowed_operators
-    from graphene_mongo.fields import respective_special_fields
+    from graphene_mongodb.operators import gen_operators_of_field, allowed_operators
+    from graphene_mongodb.fields import respective_special_fields
 
     class Other(Document):
         name = StringField()

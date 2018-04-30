@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from graphene_mongo import MongoSchema
+from graphene_mongodb import MongoSchema
 
 
 query = lambda operators: """ query testQuery {

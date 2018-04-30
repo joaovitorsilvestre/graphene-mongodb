@@ -1,4 +1,4 @@
-from graphene_mongo import MongoSchema
+from graphene_mongodb import MongoSchema
 
 
 def test_skip_parameter(schema_builder, mock_person):

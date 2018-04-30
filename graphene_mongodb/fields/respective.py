@@ -3,8 +3,8 @@ from graphene.types.datetime import DateTime
 from mongoengine import StringField, BooleanField, IntField, FloatField, DateTimeField, ObjectIdField, URLField, \
     DictField, EmailField, LongField, DecimalField, BinaryField, PointField, ReferenceField, ListField, SortedListField
 
-from graphene_mongo.fields.custom_fields import GenericField, CustomBinaryField, CustomDecimalField
-from graphene_mongo.fields.special_fields import reference_field, list_field
+from graphene_mongodb.fields.custom_fields import GenericField, CustomBinaryField, CustomDecimalField
+from graphene_mongodb.fields.special_fields import reference_field, list_field
 
 
 # http://docs.mongoengine.org/guide/defining-documents.html?highlight=emailfield#fields

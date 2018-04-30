@@ -1,6 +1,6 @@
 # GrapheneMongo
 
-GrapheneMongo is a library that integrates <a href="https://github.com/graphql-python/graphene/" target="_blank">Graphene</a> with <a target="_blank" href="https://github.com/MongoEngine/mongoengine">MongoEngine</a>
+GrapheneMongodb is a library that integrates <a href="https://github.com/graphql-python/graphene/" target="_blank">Graphene</a> with <a target="_blank" href="https://github.com/MongoEngine/mongoengine">MongoEngine</a>
 &nbsp; [![Build Status](https://travis-ci.org/joaovitorsilvestre/graphene-mongo.svg?branch=master)](https://travis-ci.org/joaovitorsilvestre/graphene-mongo)
 [![Coverage Status](https://coveralls.io/repos/github/joaovitorsilvestre/graphene-mongo/badge.svg?branch=master)](https://coveralls.io/github/joaovitorsilvestre/graphene-mongo?branch=master)
 <hr>
@@ -13,9 +13,9 @@ class User(Document):
     creation_date = DateTimeField()
     favourite_color = ListField(StringField())
 ```
-To generate a graphene schema for that Document we create a class that is subclass of graphene_mongo.MongoSchema, or we can also just call it passing the model as first argument:
+To generate a graphene schema for that Document we create a class that is subclass of graphene_mongodb.MongoSchema, or we can also just call it passing the model as first argument:
 ```python
-from graphene_mongo import MongoSchema
+from graphene_mongodb import MongoSchema
 
 class UserSchema(MongoSchema):
     model = User
@@ -80,7 +80,7 @@ mutation testMutation {
 
 We pass the attributes that we want to save in the 'params', as we did in "...createPerson(username:"John")..."
 
-In this example graphene-mongo handled the save of the object for you, but sometimes you need to make validations before actually saving the object to the database. How you can do that is explained next.
+In this example GrapheneMongodb handled the save of the object for you, but sometimes you need to make validations before actually saving the object to the database. How you can do that is explained next.
 
 ### Verifications before save
 To use your own function for saving, you need to create a function in the MongoSchema class called <b>mutate</b>. Said that, lets update our UserSchema as follows:
@@ -104,7 +104,7 @@ The <b>context</b> parameter has the request object of the framework that you're
 
 ## Operators in query
 
-Mongoengine offers many kinds of operators to use as 'in', 'gte', etc. See all operators in <a target="_blank" href="http://docs.mongoengine.org/guide/querying.html#query-operators">mongoengine documentation</a>. With Graphene-mongo you can use them in your query:
+Mongoengine offers many kinds of operators to use as 'in', 'gte', etc. See all operators in <a target="_blank" href="http://docs.mongoengine.org/guide/querying.html#query-operators">mongoengine documentation</a>. With GrapheneMongodb you can use them in your query:
 ```python
 result = schema.execute("""
 query Data {
@@ -115,7 +115,7 @@ query Data {
 }""")
 ```
 
-The best is that they are all supported by graphene-mongo.
+The best is that they are all supported by GrapheneMongodb.
 
 
 ## Validate permissions to do queries and mutations
@@ -129,7 +129,7 @@ class UserSchema(MongoSchema):
         	raise Exception('Unauthorized Access')
 ```
 
-When a validator function exists, GrapheneMongo will call it in every query or mutation of the respective schema.
+When a validator function exists, GrapheneMongodb will call it in every query or mutation of the respective schema.
 Just be sure to raise a exception that graphene will be responsible to send back to graphql client in the frontend.
 
 <br>
