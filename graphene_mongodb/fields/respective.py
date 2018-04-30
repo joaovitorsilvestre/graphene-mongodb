@@ -3,7 +3,7 @@ from graphene.types.datetime import DateTime
 from mongoengine import StringField, BooleanField, IntField, FloatField, DateTimeField, ObjectIdField, URLField, \
     DictField, EmailField, LongField, DecimalField, BinaryField, PointField, ReferenceField, ListField, SortedListField
 
-from graphene_mongodb.fields.custom_fields import GenericField, CustomBinaryField, CustomDecimalField
+from graphene_mongodb.fields.custom_fields import GenericField, CustomBinaryField, CustomDecimalField, CustomDictField
 from graphene_mongodb.fields.special_fields import reference_field, list_field
 
 
@@ -16,9 +16,9 @@ respective_fields = {
     DateTimeField: DateTime,
     ObjectIdField: graphene.ID,
     URLField: graphene.String,
-    DictField: GenericField,
-    EmailField: GenericField,
-    LongField: GenericField,
+    DictField: CustomDictField,
+    EmailField: graphene.String,
+    LongField: graphene.Float,
     DecimalField: CustomDecimalField,
     BinaryField: CustomBinaryField,
     PointField: GenericField,
