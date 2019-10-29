@@ -21,4 +21,4 @@ rx==1.6.1
 sentinels==1.0.0
 six==1.11.0
 typing==3.6.4
-werkzeug==0.14.1
+werkzeug==0.15.3
