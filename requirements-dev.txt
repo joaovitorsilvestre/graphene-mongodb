@@ -2,7 +2,7 @@ attrs==17.4.0
 click==6.7
 coverage==4.5.1
 flask-graphql==1.4.1
-flask==0.12.2
+flask==1.0
 graphql-core==2.0
 itsdangerous==0.24
 jinja2==2.10
